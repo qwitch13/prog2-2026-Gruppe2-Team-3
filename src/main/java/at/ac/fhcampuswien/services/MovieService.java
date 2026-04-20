@@ -14,6 +14,13 @@ public class MovieService {
     private final List<Movie> movies;
 
     /**
+     * Gibt die gesamte Liste der Filme zurück.
+     */
+    public List<Movie> getAllMovies() {
+        return movies;
+    }
+
+    /**
      * constructor for movieservice with dependency injection of movies list.
      *
      * @param movies the list of movies to manage
@@ -27,10 +34,17 @@ public class MovieService {
      *
      * @return a list of all movies
      */
-    public List<Movie> getAllMovies() {
-        return movies;
-    }
 
+    public List<Movie> searchMovies(String title, String genre, String releaseYear) {
+        return movies.stream()
+                .filter(m -> title == null || title.isEmpty() ||
+                        m.getTitle().toLowerCase().contains(title.toLowerCase()))
+                .filter(m -> genre == null || genre.isEmpty() ||
+                        m.getGenre().toLowerCase().contains(genre.toLowerCase()))
+                .filter(m -> releaseYear == null || releaseYear.isEmpty() ||
+                        String.valueOf(m.getReleaseYear()).equals(releaseYear))
+                .toList(); // Falls .toList() rot ist, nimm: .collect(java.util.stream.Collectors.toList())
+    }
     /**
      * checks if a movie already exists by title, genre, and release year.
      * uses stream api to find matching movie.
