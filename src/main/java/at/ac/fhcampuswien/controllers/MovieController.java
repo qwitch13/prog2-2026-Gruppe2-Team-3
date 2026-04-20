@@ -9,6 +9,8 @@ import java.io.IOException; //Exception class for I/O errors
 import java.nio.charset.StandardCharsets; //Charset for string encoding
 import java.util.List; //List interface for generic collections
 import java.util.UUID; //UUID class for unique identifiers
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**──────────────────────────────────────────────
  * Controller for managing movies - handles CRUD operations for Movie entities
@@ -26,6 +28,7 @@ public class MovieController implements HttpHandler {
         switch (path) { //Route based on the path
             case BASE + "getAll" -> handleGetAll(method, exchange); //Handle GET /api/movies/getAll
             case BASE + "add" -> handleAdd(method, exchange); //Handle POST /api/movies/add
+            case BASE + "search" -> handleSearchMovies(exchange); // Handle Get Search
             case BASE + "delete" -> handleDelete(method, exchange); //Handle DELETE /api/movies/delete
             case BASE + "update" -> handleUpdate(method, exchange); //Handle PUT /api/movies/update
             default -> {
@@ -49,6 +52,33 @@ public class MovieController implements HttpHandler {
                 ApiUtils.sendResponse(exchange, 405, response);
             }
         }
+    }
+    /**──────────────────────────────────────────────
+     * GET /api/movies/search - return only some movies
+     ──────────────────────────────────────────────**/
+
+    public void handleSearchMovies(HttpExchange exchange) throws IOException {
+        //Check if correct Methode
+        if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
+            ApiUtils.sendResponse(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
+            return;
+        }
+
+        String query = exchange.getRequestURI().getQuery();
+        Map<String, String> params = ApiUtils.parseQueryParams(query); //Get params from helper func
+
+        String title = params.getOrDefault("title", "").toLowerCase();
+        String genre = params.getOrDefault("genre", "").toLowerCase();
+        String releaseYear = params.getOrDefault("releaseYear", "").toLowerCase();
+
+        List<Movie> filteredMovies = movies.stream() //Step by step
+                .filter(movie -> title.isEmpty() || movie.getTitle().toLowerCase().contains(title)) //Keep only if true
+                .filter(movie -> genre.isEmpty() || movie.getGenre().toLowerCase().contains(genre))
+                .filter(movie -> releaseYear.isEmpty() || String.valueOf(movie.getReleaseYear()).toLowerCase().contains(releaseYear))
+                .collect(Collectors.toList()); //Collect remaining
+
+        String json = moviesToJson(filteredMovies);
+        ApiUtils.sendResponse(exchange, 200, json);
     }
 
     /**──────────────────────────────────────────────
