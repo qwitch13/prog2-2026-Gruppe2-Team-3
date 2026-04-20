@@ -4,7 +4,7 @@ import at.ac.fhcampuswien.ApiUtils; //Helper class for sending HTTP responses
 import at.ac.fhcampuswien.models.Movie; //Movie model
 import com.sun.net.httpserver.HttpExchange; //HTTP exchange object
 import com.sun.net.httpserver.HttpHandler; //HTTP handler interface
-
+import at.ac.fhcampuswien.services.MovieService; //Service layer for business logic
 import java.io.IOException; //Exception class for I/O errors
 import java.nio.charset.StandardCharsets; //Charset for string encoding
 import java.util.List; //List interface for generic collections
@@ -18,7 +18,19 @@ import java.util.stream.Collectors;
 
 public class MovieController implements HttpHandler {
     private final String BASE = "/api/movies/"; //Base path for movie endpoints
-    private List<Movie> movies = Movie.generateDummyMovies(); //List of dummy movies
+    /** Changed for EX2  **/
+    private final MovieService movieService; //Service layer for business logic
+
+    /**
+     * constructor for MovieController with dependency injection of MovieService.
+     * Initializes the service with dummy movie data.
+     */
+
+    public MovieController() {
+        List<Movie> movies = Movie.generateDummyMovies(); //List of dummy movies
+        this.movieService = new MovieService(movies); //Inject the movie list into the service
+    }
+    /** END CHANGE for EX2 **/
 
     @Override //Handle HTTP requests for movie-related endpoints
     public void handle(HttpExchange exchange) throws IOException { //Handle the HTTP request and send the response
@@ -44,7 +56,9 @@ public class MovieController implements HttpHandler {
     private void handleGetAll(String method, HttpExchange exchange) throws IOException { //Handle GET /api/movies/getAll request
         switch (method) { //Check if the request method is GET or not allowed: otherwise send 405 Method Not Allowed
             case "GET" -> {
-                String response = moviesToJson(movies);
+                /** Changed for EX2  **/
+                String response = moviesToJson(movieService.getAllMovies());
+                /** END CHANGE for EX2 **/
                 ApiUtils.sendResponse(exchange, 200, response);
             }
             default -> {
@@ -106,18 +120,17 @@ public class MovieController implements HttpHandler {
                     return;
                 }
 
-                // Check if movie already exists (by title, genre, releaseYear)
-                for (Movie m : movies) { //Iterate through the list of movies, if all true, movie already exists
-                    if (m.getTitle().equals(movie.getTitle()) //Check if the title matches the movie to be added
-                            && m.getGenre().equals(movie.getGenre()) //Check if the genre matches
-                            && m.getReleaseYear() == movie.getReleaseYear()) { //Check if the releaseYear matches
-                        String response = "{ \"error\": \"Movie already exists\" }"; //Send 400 Bad Request
-                        ApiUtils.sendResponse(exchange, 400, response); //Send the error response
-                        return;
-                    }
+                // Check if movie already exists using service
+                /** Changed for EX2  **/
+                if (movieService.movieExists(movie)) { //Use service to check if movie exists
+                    String response = "{ \"error\": \"Movie already exists\" }"; //Send 400 Bad Request
+                    ApiUtils.sendResponse(exchange, 400, response); //Send the error response
+                    return;
                 }
 
-                movies.add(movie); //Add the movie to the list
+                movieService.addMovie(movie); //Use service to add the movie
+                /** END CHANGE for EX2 **/
+
                 String response = "{ \"message\": \"Movie added successfully\" }"; //Send 201 Created
                 ApiUtils.sendResponse(exchange, 201, response); //Send the success response
             }
@@ -152,12 +165,10 @@ public class MovieController implements HttpHandler {
                     return;
                 }
 
-                // Find and remove the movie by title, genre, releaseYear
-                boolean removed = movies.removeIf(m -> //Remove the movie from the list if it matches the title, genre, and releaseYear
-                        m.getTitle().equals(movie.getTitle())
-                                && m.getGenre().equals(movie.getGenre())
-                                && m.getReleaseYear() == movie.getReleaseYear()
-                );
+                // Use service to delete the movie
+                /** Changed for EX2  **/
+                boolean removed = movieService.deleteMovie(movie); //Use service to delete the movie
+                /** END CHANGE for EX2 **/
 
                 if (removed) { //If the movie was removed, send 200 OK
                     String response = "{ \"message\": \"Movie deleted successfully\" }";
@@ -199,20 +210,15 @@ public class MovieController implements HttpHandler {
                     return;
                 }
 
-                // Find movie by id and update it
-                for (Movie m : movies) {
-                    if (m.getId().equals(updatedMovie.getId())) {
-                        m.setTitle(updatedMovie.getTitle());
-                        m.setGenre(updatedMovie.getGenre());
-                        m.setReleaseYear(updatedMovie.getReleaseYear());
-                        String response = "{ \"message\": \"Movie updated successfully\" }";
-                        ApiUtils.sendResponse(exchange, 200, response);
-                        return;
-                    }
+                /** Changed for EX2  **/
+                if (movieService.updateMovie(updatedMovie)) { //Use service to update the movie
+                    String response = "{ \"message\": \"Movie updated successfully\" }";
+                    ApiUtils.sendResponse(exchange, 200, response);
+                } else { //If the movie was not found, send 404 Not Found
+                    String response = "{ \"error\": \"Movie not found\" }";
+                    ApiUtils.sendResponse(exchange, 404, response);
                 }
-
-                String response = "{ \"error\": \"Movie not found\" }";
-                ApiUtils.sendResponse(exchange, 404, response);
+                /** END CHANGE for EX2 **/
             }
             default -> {
                 String response = "{ \"error\": \"Method not allowed\" }";
