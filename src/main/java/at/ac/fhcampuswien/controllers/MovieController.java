@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.controllers; //Controller for managing movies - handl
 
 import at.ac.fhcampuswien.ApiUtils; //Helper class for sending HTTP responses
 import at.ac.fhcampuswien.models.Movie; //Movie model
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange; //HTTP exchange object
 import com.sun.net.httpserver.HttpHandler; //HTTP handler interface
 import at.ac.fhcampuswien.services.MovieService; //Service layer for business logic
@@ -67,6 +68,7 @@ public class MovieController implements HttpHandler {
             }
         }
     }
+
     /**──────────────────────────────────────────────
      * GET /api/movies/search - return only some movies
      ──────────────────────────────────────────────**/
@@ -231,25 +233,29 @@ public class MovieController implements HttpHandler {
      * Manual JSON helpers (no external libraries)
      */
     private String movieToJson(Movie m) { //Convert a Movie object to a JSON string manually (no external library)
-        return "{ \"id\": \"" + m.getId() + "\", "
-                + "\"title\": \"" + m.getTitle() + "\", "
-                + "\"genre\": \"" + m.getGenre() + "\", "
-                + "\"releaseYear\": " + m.getReleaseYear() + " }";
+//        return "{ \"id\": \"" + m.getId() + "\", "
+//                + "\"title\": \"" + m.getTitle() + "\", "
+//                + "\"genre\": \"" + m.getGenre() + "\", "
+//                + "\"releaseYear\": " + m.getReleaseYear() + " }";
+        Gson gson = new Gson();
+        return gson.toJson(m);
     }
 
     /**
      * Converts a list of Movie objects to a JSON array string. 1 movie per line.
      */
     private String moviesToJson(List<Movie> movieList) {
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < movieList.size(); i++) {
-            sb.append(movieToJson(movieList.get(i)));
-            if (i < movieList.size() - 1) {
-                sb.append(", ");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
+//        StringBuilder sb = new StringBuilder("[");
+//        for (int i = 0; i < movieList.size(); i++) {
+//            sb.append(movieToJson(movieList.get(i)));
+//            if (i < movieList.size() - 1) {
+//                sb.append(", ");
+//            }
+//        }
+//        sb.append("]");
+//        return sb.toString();
+        Gson gson = new Gson();
+        return gson.toJson(movieList);
     }
 
     /**
@@ -257,27 +263,29 @@ public class MovieController implements HttpHandler {
      * Expects keys: "id" (optional), "title", "genre", "releaseYear".
      */
     private Movie parseMovieFromJson(String json) {
-        Movie movie = new Movie();
-        // Remove outer braces and whitespace
-        json = json.trim(); //Remove leading and trailing whitespace
-        if (json.startsWith("{")) json = json.substring(1); //Remove leading brace if present
-        if (json.endsWith("}")) json = json.substring(0, json.length() - 1); //Remove trailing brace if present
-
-        String[] pairs = json.split(","); //Split by commas
-        for (String pair : pairs) { //Iterate through each pair
-            String[] keyValue = pair.split(":", 2); //Split by colon
-            if (keyValue.length != 2) continue; //Skip if not a valid pair
-
-            String key = keyValue[0].trim().replace("\"", ""); //Remove quotes and whitespace from key
-            String value = keyValue[1].trim().replace("\"", ""); //Remove quotes and whitespace from value
-
-            switch (key) { //Map key to corresponding setter method
-                case "id" -> movie.setId(UUID.fromString(value)); //Set id if present
-                case "title" -> movie.setTitle(value); //Set title if present
-                case "genre" -> movie.setGenre(value); //Set genre if present
-                case "releaseYear" -> movie.setReleaseYear(Integer.parseInt(value)); //Set releaseYear if present
-            }
-        }
-        return movie; //Return the parsed Movie object
+//        Movie movie = new Movie();
+//        // Remove outer braces and whitespace
+//        json = json.trim(); //Remove leading and trailing whitespace
+//        if (json.startsWith("{")) json = json.substring(1); //Remove leading brace if present
+//        if (json.endsWith("}")) json = json.substring(0, json.length() - 1); //Remove trailing brace if present
+//
+//        String[] pairs = json.split(","); //Split by commas
+//        for (String pair : pairs) { //Iterate through each pair
+//            String[] keyValue = pair.split(":", 2); //Split by colon
+//            if (keyValue.length != 2) continue; //Skip if not a valid pair
+//
+//            String key = keyValue[0].trim().replace("\"", ""); //Remove quotes and whitespace from key
+//            String value = keyValue[1].trim().replace("\"", ""); //Remove quotes and whitespace from value
+//
+//            switch (key) { //Map key to corresponding setter method
+//                case "id" -> movie.setId(UUID.fromString(value)); //Set id if present
+//                case "title" -> movie.setTitle(value); //Set title if present
+//                case "genre" -> movie.setGenre(value); //Set genre if present
+//                case "releaseYear" -> movie.setReleaseYear(Integer.parseInt(value)); //Set releaseYear if present
+//            }
+//        }
+//        return movie; //Return the parsed Movie object
+        Gson gson = new Gson();
+        return gson.fromJson(json, Movie.class);
     }
 }
