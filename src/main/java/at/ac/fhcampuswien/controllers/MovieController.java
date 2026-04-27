@@ -83,15 +83,11 @@ public class MovieController implements HttpHandler {
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> params = ApiUtils.parseQueryParams(query); //Get params from helper func
 
-        String title = params.getOrDefault("title", "").toLowerCase();
-        String genre = params.getOrDefault("genre", "").toLowerCase();
-        String releaseYear = params.getOrDefault("releaseYear", "").toLowerCase();
+        String title = params.getOrDefault("title", "");
+        String genre = params.getOrDefault("genre", "");
+        String releaseYear = params.getOrDefault("releaseYear", "");
 
-        List<Movie> filteredMovies = movies.stream() //Step by step
-                .filter(movie -> title.isEmpty() || movie.getTitle().toLowerCase().contains(title)) //Keep only if true
-                .filter(movie -> genre.isEmpty() || movie.getGenre().toLowerCase().contains(genre))
-                .filter(movie -> releaseYear.isEmpty() || String.valueOf(movie.getReleaseYear()).toLowerCase().contains(releaseYear))
-                .collect(Collectors.toList()); //Collect remaining
+        List<Movie> filteredMovies = movieService.searchMovies(title, genre, releaseYear);
 
         String json = moviesToJson(filteredMovies);
         ApiUtils.sendResponse(exchange, 200, json);

@@ -32,6 +32,25 @@ public class MovieService {
     }
 
     /**
+     * searches movies by title, genre and release year.
+     * Search is case-insensitive for title and genre and also works with partial strings.
+     *
+     * @param title title or part of the title
+     * @param genre genre or part of the genre
+     * @param releaseYear release year as string
+     * @return list of matching movies
+     */
+    public List<Movie> searchMovies(String title, String genre, String releaseYear) {
+        return movies.stream()
+                .filter(movie -> title == null || title.isEmpty()
+                        || movie.getTitle().toLowerCase().contains(title.toLowerCase()))
+                .filter(movie -> genre == null || genre.isEmpty()
+                        || movie.getGenre().toLowerCase().contains(genre.toLowerCase()))
+                .filter(movie -> releaseYear == null || releaseYear.isEmpty()
+                        || String.valueOf(movie.getReleaseYear()).contains(releaseYear))
+                .toList();
+    }
+    /**
      * checks if a movie already exists by title, genre, and release year.
      * uses stream api to find matching movie.
      *
