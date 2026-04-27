@@ -7,8 +7,6 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 public class ApiUtils {
     public static void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {

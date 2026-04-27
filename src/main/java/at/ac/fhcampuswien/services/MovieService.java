@@ -30,22 +30,6 @@ public class MovieService {
     }
 
     /**
-     * retrieves all movies.
-     *
-     * @return a list of all movies
-     */
-
-    public List<Movie> searchMovies(String title, String genre, String releaseYear) {
-        return movies.stream()
-                .filter(m -> title == null || title.isEmpty() ||
-                        m.getTitle().toLowerCase().contains(title.toLowerCase()))
-                .filter(m -> genre == null || genre.isEmpty() ||
-                        m.getGenre().toLowerCase().contains(genre.toLowerCase()))
-                .filter(m -> releaseYear == null || releaseYear.isEmpty() ||
-                        String.valueOf(m.getReleaseYear()).equals(releaseYear))
-                .toList(); // Falls .toList() rot ist, nimm: .collect(java.util.stream.Collectors.toList())
-    }
-    /**
      * searches movies by title, genre and release year.
      * Search is case-insensitive for title and genre and also works with partial strings.
      *

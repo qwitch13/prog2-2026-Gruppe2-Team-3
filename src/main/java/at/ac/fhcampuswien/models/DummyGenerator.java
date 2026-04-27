@@ -45,7 +45,7 @@ public class DummyGenerator {
             "Heaven", "Hell", "Paradise", "Abyss", "Void",
             "Portal", "Dimension", "Realm", "World", "Universe",
             "Galaxy", "Cosmos", "Eclipse", "Aurora", "Nebula",
-            "Horizon", "Horizon", "Spectrum", "Rainbow", "Prism",
+            "Horizon", "Spectrum", "Rainbow", "Prism",
             "Mirror", "Reflection", "Echo", "Sound", "Silence",
             "Whisper", "Roar", "Scream", "Cry", "Laughter",
             "Truth", "Lie", "Fate", "Destiny", "Hope",
