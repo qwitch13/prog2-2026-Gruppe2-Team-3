@@ -18,7 +18,7 @@ public class Movie {
     } // Default constructor
 
     public Movie(String title, String genre, int releaseYear) { // Constructor with parameters
-        this.id = id;
+        this.id = UUID.randomUUID();
         this.title = title;
         this.genre = genre;
         this.releaseYear = releaseYear;
