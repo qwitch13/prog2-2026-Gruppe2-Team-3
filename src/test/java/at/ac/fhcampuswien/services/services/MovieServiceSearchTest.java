@@ -11,7 +11,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MovieServiceTest {
+public class MovieServiceSearchTest {
 
     private MovieService movieService;
     private List<Movie> movies;
