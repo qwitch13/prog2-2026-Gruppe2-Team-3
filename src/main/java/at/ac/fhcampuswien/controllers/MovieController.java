@@ -9,9 +9,8 @@ import at.ac.fhcampuswien.services.MovieService; //Service layer for business lo
 import java.io.IOException; //Exception class for I/O errors
 import java.nio.charset.StandardCharsets; //Charset for string encoding
 import java.util.List; //List interface for generic collections
-import java.util.UUID; //UUID class for unique identifiers
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 /**──────────────────────────────────────────────
  * Controller for managing movies - handles CRUD operations for Movie entities
