@@ -98,7 +98,7 @@ public class MovieServiceAddTest {
 
         boolean result = movieService.addMovie(newMovie);
 
-        assertTrue(result, "Should allow empty title if no validation prevents it");
+        assertTrue(result, "Should allow empty title");
         assertEquals("", testMovies.get(3).getTitle());
     }
 
@@ -108,7 +108,7 @@ public class MovieServiceAddTest {
 
         boolean result = movieService.addMovie(newMovie);
 
-        assertTrue(result, "Should allow zero release year if no validation prevents it");
+        assertTrue(result, "Should allow zero release year");
         assertEquals(0, testMovies.get(3).getReleaseYear());
     }
 
