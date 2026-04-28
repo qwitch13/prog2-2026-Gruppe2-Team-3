@@ -157,7 +157,7 @@ public class MovieController implements HttpHandler {
                     return;
                 }
 
-                if (movie.getTitle() == null || movie.getGenre() == null || movie.getReleaseYear() == 0) { //If title, genre, or releaseYear is null, send 400 Bad Request
+                if (movie == null || movie.getTitle() == null || movie.getGenre() == null || movie.getReleaseYear() == 0) { //If title, genre, or releaseYear is null, send 400 Bad Request
                     String response = "{ \"error\": \"Invalid movie data\" }";
                     ApiUtils.sendResponse(exchange, 400, response);
                     return;
