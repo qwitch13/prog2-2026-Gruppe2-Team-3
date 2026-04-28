@@ -1,6 +1,7 @@
-package at.ac.fhcampuswien.services;
+package at.ac.fhcampuswien.services.services;
 
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.services.MovieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
