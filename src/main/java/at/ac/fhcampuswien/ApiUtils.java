@@ -18,7 +18,6 @@ public class ApiUtils {
         os.write(bytes);
         os.close();
     }
-
     public static Map<String, String> parseQueryParams(String query){
         Map<String, String> params = new HashMap<>();
 
