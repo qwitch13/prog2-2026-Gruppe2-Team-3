@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.services;
+package at.ac.fhcampuswien.services.services;
 
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.services.MovieService;
