@@ -67,8 +67,12 @@ public class MovieService {
      *
      * @param movie the movie to add
      */
-    public void addMovie(Movie movie) {
+    public boolean addMovie(Movie movie) {
+        if (movie == null || movie.getTitle() == null) {
+            return false;
+        }
         movies.add(movie);
+        return true;
     }
 
     /**
