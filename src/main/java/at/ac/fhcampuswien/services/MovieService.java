@@ -79,6 +79,9 @@ public class MovieService {
      * @return true if movie was deleted, false if not found
      */
     public boolean deleteMovie(Movie movie) {
+        if (movie == null || movie.getTitle() == null) {
+            return false;
+        }
         return movies.removeIf(m -> m.getTitle().equals(movie.getTitle())
                 && m.getGenre().equals(movie.getGenre())
                 && m.getReleaseYear() == movie.getReleaseYear());
