@@ -18,22 +18,19 @@ public class ApiUtils {
         os.write(bytes);
         os.close();
     }
-    public static Map<String, String> parseQueryParams(String query){
+
+    public static Map<String, String> parseQueryParams(String query) {
         Map<String, String> params = new HashMap<>();
 
         if (query == null || query.isBlank()) {
             return params;
         }
-        //Bsp "title=dark&genre=action&releaseYear=2008" -> 3 pairs
+
         String[] pairs = query.split("&");
 
         for (String pair : pairs) {
-            //Pair bsp: pair = "title=dark"
             String[] keyValue = pair.split("=", 2);
-            //keyValue[0] = "title"
-            //keyValue[1] = "dark"
 
-            //Url decoder, for just in case
             String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
             String value = keyValue.length > 1
                     ? URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
@@ -44,5 +41,4 @@ public class ApiUtils {
 
         return params;
     }
-
 }
