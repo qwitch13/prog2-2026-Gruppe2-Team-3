@@ -7,17 +7,23 @@ import java.sql.Statement;
 
 public class DatabaseUtil {
 
+    // JDBC connection data for the H2 database.
+    // The database file is stored in the user's home directory as "movieDb".
     private static final String JDBC_URL = "jdbc:h2:~/movieDb";
     private static final String USER = "user";
     private static final String PASSWORD = "pw";
 
+    // Private constructor because this is a utility class and should not be instantiated.
     private DatabaseUtil() {
     }
 
+    // Creates and returns a new connection to the H2 database.
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
     }
 
+    // Creates the movies table if it does not already exist.
+    // This method should be called once when the application starts.
     public static void initializeDatabase() {
         String sql = """
                 CREATE TABLE IF NOT EXISTS movies (
