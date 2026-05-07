@@ -1,37 +1,52 @@
-/** created for ex2  **/
+/** updated for ex3 **/
 package at.ac.fhcampuswien.services;
 
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.repositories.MovieRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
- * service class for managing movie business logic.
- * handles crud operations for movie entities using java streams and lambda expressions.
+ * Service class for managing movie business logic.
+ *
+ * In Exercise 2 this class worked with an in-memory List<Movie>.
+ * In Exercise 3 it was refactored to use MovieRepository instead.
+ *
+ * The service layer contains the business logic.
+ * The repository layer handles the direct database access.
  */
 public class MovieService {
-    private final List<Movie> movies;
+
+    private final MovieRepository movieRepository;
 
     /**
-     * Gibt die gesamte Liste der Filme zurück.
+     * Constructor for MovieService with dependency injection of MovieRepository.
+     *
+     * @param movieRepository the repository used for database operations
+     */
+    public MovieService(MovieRepository movieRepository) {
+        this.movieRepository = movieRepository;
+    }
+
+    /**
+     * Returns the complete list of movies.
+     *
+     * The movies are now loaded from the database through MovieRepository.
+     *
+     * @return list of all movies
      */
     public List<Movie> getAllMovies() {
-        return movies;
+        return movieRepository.findAll();
     }
 
     /**
-     * constructor for movieservice with dependency injection of movies list.
+     * Searches movies by title, genre and release year.
      *
-     * @param movies the list of movies to manage
-     */
-    public MovieService(List<Movie> movies) {
-        this.movies = movies;
-    }
-
-    /**
-     * searches movies by title, genre and release year.
-     * Search is case-insensitive for title and genre and also works with partial strings.
+     * The search is case-insensitive for title and genre.
+     * It also works with partial strings.
+     *
+     * Example:
+     * title = "incep" can find "Inception".
      *
      * @param title title or part of the title
      * @param genre genre or part of the genre
@@ -39,7 +54,7 @@ public class MovieService {
      * @return list of matching movies
      */
     public List<Movie> searchMovies(String title, String genre, String releaseYear) {
-        return movies.stream()
+        return movieRepository.findAll().stream()
                 .filter(movie -> title == null || title.isEmpty()
                         || movie.getTitle().toLowerCase().contains(title.toLowerCase()))
                 .filter(movie -> genre == null || genre.isEmpty()
@@ -48,69 +63,76 @@ public class MovieService {
                         || String.valueOf(movie.getReleaseYear()).contains(releaseYear))
                 .toList();
     }
+
     /**
-     * checks if a movie already exists by title, genre, and release year.
-     * uses stream api to find matching movie.
+     * Checks if a movie already exists by title, genre and release year.
+     *
+     * The method loads all movies from the repository and checks if one movie
+     * has the same title, genre and release year.
      *
      * @param movie the movie to check
      * @return true if movie exists, false otherwise
      */
     public boolean movieExists(Movie movie) {
-        return movies.stream()
+        if (movie == null || movie.getTitle() == null) {
+            return false;
+        }
+
+        return movieRepository.findAll().stream()
                 .anyMatch(m -> m.getTitle().equals(movie.getTitle())
                         && m.getGenre().equals(movie.getGenre())
                         && m.getReleaseYear() == movie.getReleaseYear());
     }
 
     /**
-     * adds a new movie to the list.
+     * Adds a new movie to the database.
+     *
+     * The service checks if the movie is valid.
+     * The actual database insert is done by MovieRepository.
      *
      * @param movie the movie to add
+     * @return true if movie was added, false otherwise
      */
     public boolean addMovie(Movie movie) {
         if (movie == null || movie.getTitle() == null) {
             return false;
         }
-        movies.add(movie);
+
+        movieRepository.add(movie);
         return true;
     }
 
     /**
-     * deletes a movie by title, genre, and release year.
-     * uses removeif with stream-compatible lambda expression.
+     * Deletes a movie from the database.
      *
-     * @param movie the movie to delete (identified by title, genre, releaseYear)
+     * The movie is identified by title, genre and release year.
+     * The actual database delete operation is done by MovieRepository.
+     *
+     * @param movie the movie to delete
      * @return true if movie was deleted, false if not found
      */
     public boolean deleteMovie(Movie movie) {
         if (movie == null || movie.getTitle() == null) {
             return false;
         }
-        return movies.removeIf(m -> m.getTitle().equals(movie.getTitle())
-                && m.getGenre().equals(movie.getGenre())
-                && m.getReleaseYear() == movie.getReleaseYear());
+
+        return movieRepository.delete(movie);
     }
 
     /**
-     * updates a movie by its id with new values.
-     * uses stream api to find the movie by id.
+     * Updates an existing movie in the database.
      *
-     * @param updatedMovie the movie with updated values (must include id)
+     * The movie is identified by its id.
+     * The actual database update operation is done by MovieRepository.
+     *
+     * @param updatedMovie the movie with updated values
      * @return true if movie was updated, false if not found
      */
     public boolean updateMovie(Movie updatedMovie) {
-        Optional<Movie> existingMovie = movies.stream()
-                .filter(m -> m.getId().equals(updatedMovie.getId()))
-                .findFirst();
-
-        if (existingMovie.isPresent()) {
-            Movie movie = existingMovie.get();
-            movie.setTitle(updatedMovie.getTitle());
-            movie.setGenre(updatedMovie.getGenre());
-            movie.setReleaseYear(updatedMovie.getReleaseYear());
-            return true;
+        if (updatedMovie == null || updatedMovie.getId() == null) {
+            return false;
         }
 
-        return false;
+        return movieRepository.update(updatedMovie);
     }
-} //**created for exercise 2**/
+} // **updated for exercise 3**/
