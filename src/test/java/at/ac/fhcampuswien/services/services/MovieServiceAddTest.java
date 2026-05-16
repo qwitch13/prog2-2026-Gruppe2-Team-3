@@ -1,124 +1,105 @@
 package at.ac.fhcampuswien.services.services;
+
+import at.ac.fhcampuswien.exceptions.DatabaseException;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.repositories.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+// add-related tests for MovieService.
+// MovieRepository is mocked so the test never touches the real h2 database.
 public class MovieServiceAddTest {
+
     private MovieService movieService;
-    private List<Movie> testMovies;
-    private Movie movie1;
-    private Movie movie2;
-    private Movie movie3;
+    private MovieRepository movieRepository;
+    private List<Movie> movies;
 
     @BeforeEach
-    void setUp() {
-        testMovies = new ArrayList<>();
+    void setUp() throws DatabaseException, MovieNotFoundException {
+        movieRepository = mock(MovieRepository.class);
 
-        movie1 = new Movie("Inception", "Sci-Fi", 2010);
-        movie2 = new Movie("The Dark Knight", "Action", 2008);
-        movie3 = new Movie("Interstellar", "Sci-Fi", 2014);
+        movies = new ArrayList<>(Arrays.asList(
+                new Movie("Inception", "Sci-Fi", 2010),
+                new Movie("The Dark Knight", "Action", 2008),
+                new Movie("Interstellar", "Sci-Fi", 2014)
+        ));
 
-        testMovies.add(movie1);
-        testMovies.add(movie2);
-        testMovies.add(movie3);
+        // every findAll() returns the same in-memory list; add() appends to it
+        // so we can keep the existing "list grows by one" style of assertions.
+        when(movieRepository.findAll()).thenReturn(movies);
+        doAnswer(invocation -> {
+            movies.add(invocation.getArgument(0));
+            return null;
+        }).when(movieRepository).add(any(Movie.class));
 
-        movieService = new MovieService(testMovies);
+        movieService = new MovieService(movieRepository);
     }
 
     @Test
-    void testAddMovie_Success() {
+    void testAddMovie_Success() throws DatabaseException {
         Movie newMovie = new Movie("Titanic", "Drama", 1997);
 
         boolean result = movieService.addMovie(newMovie);
 
         assertTrue(result, "Should return true when movie is added");
-        assertEquals(4, testMovies.size(), "Movie list should contain one more movie");
-        assertTrue(testMovies.contains(newMovie), "Movie list should contain the added movie");
+        verify(movieRepository, times(1)).add(newMovie);
+        assertEquals(4, movies.size(), "Movie list should contain one more movie");
+        assertTrue(movies.contains(newMovie));
     }
 
     @Test
-    void testAddMovie_AddsCorrectTitle() {
+    void testAddMovie_DelegatesToRepository() throws DatabaseException {
         Movie newMovie = new Movie("Titanic", "Drama", 1997);
 
         movieService.addMovie(newMovie);
 
-        assertEquals("Titanic", testMovies.get(3).getTitle());
+        // the only thing the service should do on a valid movie is call repository.add
+        verify(movieRepository).add(newMovie);
     }
 
     @Test
-    void testAddMovie_AddsCorrectGenre() {
-        Movie newMovie = new Movie("Titanic", "Drama", 1997);
+    void testAddMovie_NullMovie_ReturnsFalse() throws DatabaseException {
+        boolean result = movieService.addMovie(null);
 
-        movieService.addMovie(newMovie);
-
-        assertEquals("Drama", testMovies.get(3).getGenre());
+        assertFalse(result);
+        verify(movieRepository, never()).add(any());
     }
 
     @Test
-    void testAddMovie_AddsCorrectReleaseYear() {
-        Movie newMovie = new Movie("Titanic", "Drama", 1997);
+    void testAddMovie_NullTitle_ReturnsFalse() throws DatabaseException {
+        Movie incomplete = new Movie(null, "Drama", 1997);
 
-        movieService.addMovie(newMovie);
+        boolean result = movieService.addMovie(incomplete);
 
-        assertEquals(1997, testMovies.get(3).getReleaseYear());
+        assertFalse(result);
+        verify(movieRepository, never()).add(any());
     }
 
     @Test
-    void testAddMovie_DoesNotModifyExistingMovies() {
-        Movie newMovie = new Movie("Titanic", "Drama", 1997);
+    void testAddMovie_MultipleMovies() throws DatabaseException {
+        movieService.addMovie(new Movie("Titanic", "Drama", 1997));
+        movieService.addMovie(new Movie("Avatar", "Sci-Fi", 2009));
 
-        movieService.addMovie(newMovie);
-
-        assertEquals("Inception", movie1.getTitle());
-        assertEquals("The Dark Knight", movie2.getTitle());
-        assertEquals("Interstellar", movie3.getTitle());
+        verify(movieRepository, times(2)).add(any(Movie.class));
+        assertEquals(5, movies.size());
     }
 
     @Test
-    void testAddMovie_MultipleMovies() {
-        Movie movie4 = new Movie("Titanic", "Drama", 1997);
-        Movie movie5 = new Movie("Avatar", "Sci-Fi", 2009);
+    void testAddMovie_PropagatesDatabaseException() throws DatabaseException {
+        Movie movie = new Movie("Titanic", "Drama", 1997);
+        doThrow(new DatabaseException("connection lost"))
+                .when(movieRepository).add(movie);
 
-        movieService.addMovie(movie4);
-        movieService.addMovie(movie5);
-
-        assertEquals(5, testMovies.size());
-        assertTrue(testMovies.contains(movie4));
-        assertTrue(testMovies.contains(movie5));
-    }
-
-    @Test
-    void testAddMovie_EmptyTitle() {
-        Movie newMovie = new Movie("", "Drama", 1997);
-
-        boolean result = movieService.addMovie(newMovie);
-
-        assertTrue(result, "Should allow empty title");
-        assertEquals("", testMovies.get(3).getTitle());
-    }
-
-    @Test
-    void testAddMovie_ZeroReleaseYear() {
-        Movie newMovie = new Movie("Unknown Movie", "Drama", 0);
-
-        boolean result = movieService.addMovie(newMovie);
-
-        assertTrue(result, "Should allow zero release year");
-        assertEquals(0, testMovies.get(3).getReleaseYear());
-    }
-
-    @Test
-    void testAddMovie_PreservesGeneratedId() {
-        Movie newMovie = new Movie("Titanic", "Drama", 1997);
-
-        movieService.addMovie(newMovie);
-
-        assertNotNull(newMovie.getId(), "Added movie should have an ID");
-        assertEquals(newMovie.getId(), testMovies.get(3).getId(), "ID should remain the same");
+        assertThrows(DatabaseException.class, () -> movieService.addMovie(movie));
     }
 }

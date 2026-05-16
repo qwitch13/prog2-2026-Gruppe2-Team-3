@@ -1,0 +1,406 @@
+{
+  "info": {
+    "name": "Java Backend Demo API",
+    "description": "Complete REST API collection for the Java backend application with HelloController and MovieController endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "java-backend-demo-api",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "HelloController",
+      "description": "Greeting and information endpoints",
+      "item": [
+        {
+          "name": "GET /api/hello/",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hello/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hello", ""]
+            },
+            "description": "Returns base endpoint information"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/hello/",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "hello", ""]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Base endpoint in /api/hello/!\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /api/hello/greet",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hello/greet",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hello", "greet"]
+            },
+            "description": "Returns a static greeting message"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/hello/greet",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "hello", "greet"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Hello, friend!\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /api/hello/greet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John\",\n  \"message\": \"Hello, API!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/hello/greet",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hello", "greet"]
+            },
+            "description": "Echoes the JSON data sent in the request body"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John\",\n  \"message\": \"Hello, API!\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8080/api/hello/greet",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "hello", "greet"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"received\": {\"name\": \"John\", \"message\": \"Hello, API!\"}\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /api/hello/info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hello/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hello", "info"]
+            },
+            "description": "Returns information about the Hello API"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/hello/info",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "hello", "info"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"info\": \"This is the Hello API\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MovieController",
+      "description": "Movie CRUD operations",
+      "item": [
+        {
+          "name": "GET /api/movies/getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/getAll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "getAll"]
+            },
+            "description": "Retrieves a list of all movies in the system"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/movies/getAll",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "movies", "getAll"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"title\": \"The Shawshank Redemption\",\n    \"genre\": \"Drama\",\n    \"releaseYear\": 1994\n  },\n  {\n    \"id\": \"6ba7b810-9dad-11d1-80b4-00c04fd430c8\",\n    \"title\": \"The Godfather\",\n    \"genre\": \"Crime\",\n    \"releaseYear\": 1972\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /api/movies/add",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Inception\",\n  \"genre\": \"Sci-Fi\",\n  \"releaseYear\": 2010\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "add"]
+            },
+            "description": "Creates a new movie and adds it to the collection. Required fields: title, genre, releaseYear"
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Inception\",\n  \"genre\": \"Sci-Fi\",\n  \"releaseYear\": 2010\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8080/api/movies/add",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "movies", "add"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Movie added successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/movies/delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Inception\",\n  \"genre\": \"Sci-Fi\",\n  \"releaseYear\": 2010\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/delete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "delete"]
+            },
+            "description": "Deletes a movie from the collection. Movie is matched by exact combination of title, genre, and releaseYear"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Inception\",\n  \"genre\": \"Sci-Fi\",\n  \"releaseYear\": 2010\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8080/api/movies/delete",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "movies", "delete"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Movie deleted successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/movies/update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"title\": \"Inception: Directors Cut\",\n  \"genre\": \"Sci-Fi\",\n  \"releaseYear\": 2010\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/movies/update",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "movies", "update"]
+            },
+            "description": "Updates an existing movie's information. Required fields: id, title, genre, releaseYear"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"title\": \"Inception: Directors Cut\",\n  \"genre\": \"Sci-Fi\",\n  \"releaseYear\": 2010\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8080/api/movies/update",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "movies", "update"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Movie updated successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}

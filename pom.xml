@@ -35,6 +35,22 @@
         </dependency>
 
         <dependency>
+            <!-- mockito-subclass uses cglib-style subclassing instead of bytecode rewriting,
+                 which keeps it working on jdk 25 where the default inline mock maker fails. -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-subclass</artifactId>
+            <version>5.14.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- mockito-junit-jupiter wires the @Mock / @ExtendWith integration with junit 5 -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.14.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>26.1.0</version>

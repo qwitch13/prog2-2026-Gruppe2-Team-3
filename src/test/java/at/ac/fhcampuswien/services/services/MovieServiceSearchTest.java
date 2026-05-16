@@ -1,35 +1,46 @@
-
 package at.ac.fhcampuswien.services.services;
 
+import at.ac.fhcampuswien.exceptions.DatabaseException;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.repositories.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+// search-related tests for MovieService.
+// findAll() on the mock repository returns a fixed catalog used by every test.
 public class MovieServiceSearchTest {
 
     private MovieService movieService;
-    private List<Movie> movies;
+    private MovieRepository movieRepository;
 
     @BeforeEach
-    void setUp() {
-        movies = new ArrayList<>();
+    void setUp() throws DatabaseException, MovieNotFoundException {
+        movieRepository = mock(MovieRepository.class);
 
-        movies.add(new Movie("Inception", "Sci-Fi", 2010));
-        movies.add(new Movie("The Dark Knight", "Action", 2008));
-        movies.add(new Movie("Interstellar", "Sci-Fi", 2014));
-        movies.add(new Movie("Titanic", "Romance", 1997));
+        List<Movie> catalog = new ArrayList<>(Arrays.asList(
+                new Movie("Inception", "Sci-Fi", 2010),
+                new Movie("The Dark Knight", "Action", 2008),
+                new Movie("Interstellar", "Sci-Fi", 2014),
+                new Movie("Titanic", "Romance", 1997)
+        ));
 
-        movieService = new MovieService(movies);
+        when(movieRepository.findAll()).thenReturn(catalog);
+
+        movieService = new MovieService(movieRepository);
     }
 
     @Test
-    void givenExactTitle_whenSearchMovies_thenReturnsMatchingMovie() {
+    void givenExactTitle_whenSearchMovies_thenReturnsMatchingMovie() throws DatabaseException {
         List<Movie> result = movieService.searchMovies("Inception", null, null);
 
         assertEquals(1, result.size());
@@ -37,7 +48,7 @@ public class MovieServiceSearchTest {
     }
 
     @Test
-    void givenPartialTitle_whenSearchMovies_thenReturnsMatchingMovie() {
+    void givenPartialTitle_whenSearchMovies_thenReturnsMatchingMovie() throws DatabaseException {
         List<Movie> result = movieService.searchMovies("ncep", null, null);
 
         assertEquals(1, result.size());
@@ -45,7 +56,7 @@ public class MovieServiceSearchTest {
     }
 
     @Test
-    void givenLowercaseTitle_whenSearchMovies_thenSearchIsCaseInsensitive() {
+    void givenLowercaseTitle_whenSearchMovies_thenSearchIsCaseInsensitive() throws DatabaseException {
         List<Movie> result = movieService.searchMovies("inception", null, null);
 
         assertEquals(1, result.size());
@@ -53,7 +64,7 @@ public class MovieServiceSearchTest {
     }
 
     @Test
-    void givenGenre_whenSearchMovies_thenReturnsAllMoviesWithGenre() {
+    void givenGenre_whenSearchMovies_thenReturnsAllMoviesWithGenre() throws DatabaseException {
         List<Movie> result = movieService.searchMovies(null, "Sci-Fi", null);
 
         assertEquals(2, result.size());
@@ -61,7 +72,7 @@ public class MovieServiceSearchTest {
     }
 
     @Test
-    void givenLowercaseGenre_whenSearchMovies_thenSearchIsCaseInsensitive() {
+    void givenLowercaseGenre_whenSearchMovies_thenSearchIsCaseInsensitive() throws DatabaseException {
         List<Movie> result = movieService.searchMovies(null, "sci-fi", null);
 
         assertEquals(2, result.size());
@@ -69,7 +80,7 @@ public class MovieServiceSearchTest {
     }
 
     @Test
-    void givenReleaseYear_whenSearchMovies_thenReturnsMovieFromThatYear() {
+    void givenReleaseYear_whenSearchMovies_thenReturnsMovieFromThatYear() throws DatabaseException {
         List<Movie> result = movieService.searchMovies(null, null, "2010");
 
         assertEquals(1, result.size());
@@ -77,7 +88,7 @@ public class MovieServiceSearchTest {
     }
 
     @Test
-    void givenTitleGenreAndReleaseYear_whenSearchMovies_thenReturnsOnlyMatchingMovie() {
+    void givenTitleGenreAndReleaseYear_whenSearchMovies_thenReturnsOnlyMatchingMovie() throws DatabaseException {
         List<Movie> result = movieService.searchMovies("incep", "sci-fi", "2010");
 
         assertEquals(1, result.size());
@@ -85,23 +96,30 @@ public class MovieServiceSearchTest {
     }
 
     @Test
-    void givenNoMatchingSearchValues_whenSearchMovies_thenReturnsEmptyList() {
+    void givenNoMatchingSearchValues_whenSearchMovies_thenReturnsEmptyList() throws DatabaseException {
         List<Movie> result = movieService.searchMovies("Unknown", "Drama", "2025");
 
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void givenEmptySearchValues_whenSearchMovies_thenReturnsAllMovies() {
+    void givenEmptySearchValues_whenSearchMovies_thenReturnsAllMovies() throws DatabaseException {
         List<Movie> result = movieService.searchMovies("", "", "");
 
         assertEquals(4, result.size());
     }
 
     @Test
-    void givenNullSearchValues_whenSearchMovies_thenReturnsAllMovies() {
+    void givenNullSearchValues_whenSearchMovies_thenReturnsAllMovies() throws DatabaseException {
         List<Movie> result = movieService.searchMovies(null, null, null);
 
         assertEquals(4, result.size());
+    }
+
+    @Test
+    void givenDatabaseError_whenSearchMovies_propagatesDatabaseException() throws DatabaseException {
+        when(movieRepository.findAll()).thenThrow(new DatabaseException("connection lost"));
+
+        assertThrows(DatabaseException.class, () -> movieService.searchMovies("Inception", null, null));
     }
 }
