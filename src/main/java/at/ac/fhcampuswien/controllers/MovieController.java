@@ -1,13 +1,13 @@
 package at.ac.fhcampuswien.controllers;
 
 import at.ac.fhcampuswien.ApiUtils;
-import at.ac.fhcampuswien.exceptions.DatabaseException;
-import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
+import at.ac.fhcampuswien.controllers.routing.RouteRegistry;
+import at.ac.fhcampuswien.exceptions.HttpExceptionMapper;
+import at.ac.fhcampuswien.exceptions.HttpExceptionMapper.HttpError;
 import at.ac.fhcampuswien.models.Movie;
-import at.ac.fhcampuswien.repositories.MovieRepository;
+import at.ac.fhcampuswien.repositories.JdbcMovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -16,72 +16,57 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-// controller for the /api/movies/ resource.
-// every request is dispatched first by exact path, then by http method.
-// each handler is wrapped in a try/catch block that maps the application
-// exceptions to the expected http status codes:
-//   MovieNotFoundException -> 404
-//   DatabaseException      -> 500
-//   JsonSyntaxException    -> 400
-//   any other Throwable    -> 500 (safety net so the server never leaks stack traces)
+// HTTP-facing layer for /api/movies/. after the exercise-4 refactor this class
+// is responsible for one thing only: turning HttpExchanges into MovieService
+// calls and writing the response. it delegates:
+//   - path/method dispatch to RouteRegistry  (OCP - new routes don't touch handle())
+//   - exception -> http translation to HttpExceptionMapper  (SRP, behavioural pattern)
+//   - persistence to MovieRepository through MovieService  (DIP)
 public class MovieController implements HttpHandler {
     private static final String BASE = "/api/movies/";
 
     private final MovieService movieService;
     private final Gson gson = new Gson();
+    private final RouteRegistry routes = new RouteRegistry();
+    private final HttpExceptionMapper exceptionMapper = HttpExceptionMapper.defaultMapper();
 
     // default constructor used in Main: wires service to the real repository.
     public MovieController() {
-        this(new MovieService(new MovieRepository()));
+        this(new MovieService(new JdbcMovieRepository()));
     }
 
     // testing/main-demo constructor that accepts a pre-built service.
     public MovieController(MovieService movieService) {
         this.movieService = movieService;
+        registerRoutes();
+    }
+
+    // route table - the only place that grows when a new endpoint is added.
+    private void registerRoutes() {
+        routes.register("GET", BASE + "getAll", this::handleGetAll);
+        routes.register("GET", BASE + "search", this::handleSearchMovies);
+        routes.register("POST", BASE + "add", this::handleAdd);
+        routes.register("DELETE", BASE + "delete", this::handleDelete);
+        routes.register("PUT", BASE + "update", this::handleUpdate);
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
-        String path = exchange.getRequestURI().getPath();
-
-        switch (path) {
-            case BASE + "getAll" -> handleGetAll(method, exchange);
-            case BASE + "add" -> handleAdd(method, exchange);
-            case BASE + "search" -> handleSearchMovies(exchange);
-            case BASE + "delete" -> handleDelete(method, exchange);
-            case BASE + "update" -> handleUpdate(method, exchange);
-            default -> ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"Path not found\" }");
-        }
+        routes.dispatch(exchange);
     }
 
     // GET /api/movies/getAll - returns all movies.
-    private void handleGetAll(String method, HttpExchange exchange) throws IOException {
-        if (!"GET".equals(method)) {
-            ApiUtils.sendResponse(exchange, 405, "{ \"error\": \"Method not allowed\" }");
-            return;
-        }
-
-        try {
+    private void handleGetAll(HttpExchange exchange) throws IOException {
+        runHandled(exchange, () -> {
             String response = gson.toJson(movieService.getAllMovies());
             ApiUtils.sendResponse(exchange, 200, response);
-        } catch (DatabaseException e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Database error: " + e.getMessage()));
-        } catch (Exception e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Internal server error"));
-        }
+        });
     }
 
     // GET /api/movies/search?title=...&genre=...&releaseYear=...
     private void handleSearchMovies(HttpExchange exchange) throws IOException {
-        if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
-            ApiUtils.sendResponse(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
-            return;
-        }
-
-        try {
-            String query = exchange.getRequestURI().getQuery();
-            Map<String, String> params = ApiUtils.parseQueryParams(query);
+        runHandled(exchange, () -> {
+            Map<String, String> params = ApiUtils.parseQueryParams(exchange.getRequestURI().getQuery());
 
             String title = params.getOrDefault("title", "");
             String genre = params.getOrDefault("genre", "");
@@ -89,94 +74,56 @@ public class MovieController implements HttpHandler {
 
             List<Movie> filteredMovies = movieService.searchMovies(title, genre, releaseYear);
             ApiUtils.sendResponse(exchange, 200, gson.toJson(filteredMovies));
-        } catch (DatabaseException e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Database error: " + e.getMessage()));
-        } catch (Exception e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Internal server error"));
-        }
+        });
     }
 
-    // POST /api/movies/add - body: { "title": ..., "genre": ..., "releaseYear": ... }
-    private void handleAdd(String method, HttpExchange exchange) throws IOException {
-        if (!"POST".equals(method)) {
-            ApiUtils.sendResponse(exchange, 405, "{ \"error\": \"Method not allowed\" }");
-            return;
-        }
-
-        String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-
-        try {
+    // POST /api/movies/add
+    private void handleAdd(HttpExchange exchange) throws IOException {
+        runHandled(exchange, () -> {
+            String requestBody = readBody(exchange);
             Movie movie = gson.fromJson(requestBody, Movie.class);
 
             if (movie == null
                     || movie.getTitle() == null
                     || movie.getGenre() == null
                     || movie.getReleaseYear() == 0) {
-                ApiUtils.sendResponse(exchange, 400, errorJson("Invalid movie data"));
+                ApiUtils.sendResponse(exchange, 400, HttpExceptionMapper.errorJson("Invalid movie data"));
                 return;
             }
 
             if (movieService.movieExists(movie)) {
-                ApiUtils.sendResponse(exchange, 400, errorJson("Movie already exists"));
+                ApiUtils.sendResponse(exchange, 400, HttpExceptionMapper.errorJson("Movie already exists"));
                 return;
             }
 
             movieService.addMovie(movie);
             ApiUtils.sendResponse(exchange, 201, "{ \"message\": \"Movie added successfully\" }");
-
-        } catch (JsonSyntaxException e) {
-            ApiUtils.sendResponse(exchange, 400, errorJson("Malformed JSON: " + e.getMessage()));
-        } catch (DatabaseException e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Database error: " + e.getMessage()));
-        } catch (Exception e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Internal server error"));
-        }
+        });
     }
 
-    // DELETE /api/movies/delete - body identifies the movie by title/genre/releaseYear.
-    private void handleDelete(String method, HttpExchange exchange) throws IOException {
-        if (!"DELETE".equals(method)) {
-            ApiUtils.sendResponse(exchange, 405, "{ \"error\": \"Method not allowed\" }");
-            return;
-        }
-
-        String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-
-        try {
+    // DELETE /api/movies/delete
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        runHandled(exchange, () -> {
+            String requestBody = readBody(exchange);
             Movie movie = gson.fromJson(requestBody, Movie.class);
 
             if (movie == null
                     || movie.getTitle() == null
                     || movie.getGenre() == null
                     || movie.getReleaseYear() == 0) {
-                ApiUtils.sendResponse(exchange, 400, errorJson("Invalid movie data"));
+                ApiUtils.sendResponse(exchange, 400, HttpExceptionMapper.errorJson("Invalid movie data"));
                 return;
             }
 
             movieService.deleteMovie(movie);
             ApiUtils.sendResponse(exchange, 200, "{ \"message\": \"Movie deleted successfully\" }");
-
-        } catch (JsonSyntaxException e) {
-            ApiUtils.sendResponse(exchange, 400, errorJson("Malformed JSON: " + e.getMessage()));
-        } catch (MovieNotFoundException e) {
-            ApiUtils.sendResponse(exchange, 404, errorJson(e.getMessage()));
-        } catch (DatabaseException e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Database error: " + e.getMessage()));
-        } catch (Exception e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Internal server error"));
-        }
+        });
     }
 
-    // PUT /api/movies/update - body must include id plus updated title/genre/releaseYear.
-    private void handleUpdate(String method, HttpExchange exchange) throws IOException {
-        if (!"PUT".equals(method)) {
-            ApiUtils.sendResponse(exchange, 405, "{ \"error\": \"Method not allowed\" }");
-            return;
-        }
-
-        String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-
-        try {
+    // PUT /api/movies/update
+    private void handleUpdate(HttpExchange exchange) throws IOException {
+        runHandled(exchange, () -> {
+            String requestBody = readBody(exchange);
             Movie updatedMovie = gson.fromJson(requestBody, Movie.class);
 
             if (updatedMovie == null
@@ -184,26 +131,36 @@ public class MovieController implements HttpHandler {
                     || updatedMovie.getTitle() == null
                     || updatedMovie.getGenre() == null
                     || updatedMovie.getReleaseYear() == 0) {
-                ApiUtils.sendResponse(exchange, 400, errorJson("Invalid movie data"));
+                ApiUtils.sendResponse(exchange, 400, HttpExceptionMapper.errorJson("Invalid movie data"));
                 return;
             }
 
             movieService.updateMovie(updatedMovie);
             ApiUtils.sendResponse(exchange, 200, "{ \"message\": \"Movie updated successfully\" }");
+        });
+    }
 
-        } catch (JsonSyntaxException e) {
-            ApiUtils.sendResponse(exchange, 400, errorJson("Malformed JSON: " + e.getMessage()));
-        } catch (MovieNotFoundException e) {
-            ApiUtils.sendResponse(exchange, 404, errorJson(e.getMessage()));
-        } catch (DatabaseException e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Database error: " + e.getMessage()));
+    // runs a handler body and routes any thrown exception through the central mapper.
+    // keeps every handler free of its own try/catch tower (SRP).
+    private void runHandled(HttpExchange exchange, ThrowingRunnable action) throws IOException {
+        try {
+            action.run();
+        } catch (IOException e) {
+            // bubble up i/o errors so the http server can react properly
+            throw e;
         } catch (Exception e) {
-            ApiUtils.sendResponse(exchange, 500, errorJson("Internal server error"));
+            HttpError error = exceptionMapper.map(e);
+            ApiUtils.sendResponse(exchange, error.status(), error.body());
         }
     }
 
-    // small helper that wraps a plain message in the canonical error envelope.
-    private String errorJson(String message) {
-        return "{ \"error\": \"" + message.replace("\"", "\\\"") + "\" }";
+    private static String readBody(HttpExchange exchange) throws IOException {
+        return new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+    }
+
+    // local checked-exception aware Runnable so handlers can throw freely.
+    @FunctionalInterface
+    private interface ThrowingRunnable {
+        void run() throws Exception;
     }
 }

@@ -6,6 +6,8 @@ import at.ac.fhcampuswien.database.DatabaseUtil;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.repositories.JdbcMovieRepository;
+import at.ac.fhcampuswien.repositories.LoggingMovieRepository;
 import at.ac.fhcampuswien.repositories.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
 import com.sun.net.httpserver.HttpContext;
@@ -56,7 +58,11 @@ public class Main {
     // demonstration sequence used to verify the repository wiring locally.
     // runs only when the application is started with -Dex3.demo=true.
     private static void runDatabaseDemo() {
-        MovieService service = new MovieService(new MovieRepository());
+        // demo wiring shows the decorator at work: LoggingMovieRepository wraps
+        // the real jdbc repository and adds a log line to every call without
+        // any changes to either MovieService or JdbcMovieRepository.
+        MovieRepository repository = new LoggingMovieRepository(new JdbcMovieRepository());
+        MovieService service = new MovieService(repository);
         try {
             Movie inception = new Movie("Inception", "Sci-Fi", 2010);
             Movie interstellar = new Movie("Interstellar", "Sci-Fi", 2014);
