@@ -1,5 +1,7 @@
 package at.ac.fhcampuswien.services;
 
+import at.ac.fhcampuswien.database.DatabaseException;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.repositories.MovieRepository;
 
@@ -18,7 +20,7 @@ public class MovieService {
         return movieRepository.findAll();
     }
 
-    public List<Movie> searchMovies(String title, String genre, String releaseYear) throws SQLException {
+    public List<Movie> searchMovies(String title, String genre, String releaseYear) throws DatabaseException {
         return movieRepository.findAll().stream()
                 .filter(movie -> title == null || title.isEmpty()
                         || movie.getTitle().toLowerCase().contains(title.toLowerCase()))
@@ -40,7 +42,7 @@ public class MovieService {
                         && m.getReleaseYear() == movie.getReleaseYear());
     }
 
-    public boolean addMovie(Movie movie) throws SQLException {
+    public boolean addMovie(Movie movie) throws DatabaseException {
         if (movie == null || movie.getTitle() == null) {
             return false;
         }
@@ -49,7 +51,7 @@ public class MovieService {
         return true;
     }
 
-    public boolean deleteMovie(Movie movie) throws SQLException {
+    public boolean deleteMovie(Movie movie) throws DatabaseException, MovieNotFoundException {
         if (movie == null || movie.getTitle() == null) {
             return false;
         }
@@ -57,7 +59,7 @@ public class MovieService {
         return movieRepository.delete(movie);
     }
 
-    public boolean updateMovie(Movie updatedMovie) throws SQLException {
+    public boolean updateMovie(Movie updatedMovie) throws MovieNotFoundException, DatabaseException {
         if (updatedMovie == null || updatedMovie.getId() == null) {
             return false;
         }

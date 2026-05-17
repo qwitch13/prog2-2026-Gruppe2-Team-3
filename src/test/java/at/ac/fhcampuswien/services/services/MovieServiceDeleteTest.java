@@ -1,12 +1,13 @@
 package at.ac.fhcampuswien.services.services;
 
-import at.ac.fhcampuswien.exceptions.DatabaseException;
+import at.ac.fhcampuswien.database.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.repositories.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.*;
 public class MovieServiceDeleteTest {
 
     private MovieService movieService;
+    @Mock
     private MovieRepository movieRepository;
 
     @BeforeEach
