@@ -8,23 +8,17 @@ Abstracts data access and persistence operations for the database layer.
 Implements data access for movie operations.
 
 **Key Methods:**
-- `getAll()` - Retrieve all movies from database
-- `search(title, genre, releaseYear)` - Query movies with filters
+- `findAll()` - Retrieve all movies from database
 - `add(movie)` - Insert a new movie
-- `delete(movie)` - Remove a movie
-- `update(movie)` - Modify an existing movie
-- `exists(movie)` - Check if a movie already exists
+- `delete(movie)` - Remove a movie (returns boolean)
+- `update(movie)` - Modify an existing movie (returns boolean)
 
 **Responsibilities:**
 - Abstracts database interactions using H2 SQL database
 - Handles SQL query execution
 - Translates between Movie objects and database records
-- Throws `DatabaseException` for persistence errors
-- Throws `MovieNotFoundException` when a movie is not found
-
-**Exception Handling:**
-- `DatabaseException` - Wraps SQL or connection errors
-- `MovieNotFoundException` - Thrown when delete/update targets non-existent movie
+- Returns boolean for delete/update to indicate success/failure
+- All methods throw `SQLException` for database errors
 
 ## Database Connection
 

@@ -24,11 +24,7 @@ HTTP handler for the `/api/movies/` endpoint group.
 - Full CRUD operations for movies
 - Search functionality with query parameters
 - Input validation for movie data
-- Exception mapping to HTTP status codes:
-  - `MovieNotFoundException` → 404
-  - `DatabaseException` → 500
-  - `JsonSyntaxException` → 400
-  - Other exceptions → 500 (prevents stack trace leaks)
+- Delete/update operations check boolean return values to determine if resource was found
 
 **Endpoints:**
 - `GET /api/movies/getAll` - Retrieve all movies

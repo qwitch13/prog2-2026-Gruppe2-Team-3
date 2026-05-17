@@ -17,14 +17,14 @@ Orchestrates movie operations and coordinates between controllers and the reposi
 
 **Responsibilities:**
 - Encapsulates business logic for movie operations
-- Validates data before persistence (where applicable)
+- Validates data before persistence
 - Handles communication with the repository layer
-- Propagates exceptions from the repository up to controllers
+- Provides boolean return values from delete/update operations
 - Manages the Movie model lifecycle
 
 **Exception Handling:**
-- Allows exceptions from the repository to bubble up
-- Exceptions are caught and mapped to HTTP status codes by the controller layer
+- All methods propagate `SQLException` from the repository to the controller
+- Controllers handle exceptions and map them to appropriate HTTP responses
 
 ## Architecture Pattern
 
