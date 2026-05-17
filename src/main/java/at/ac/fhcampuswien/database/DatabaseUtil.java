@@ -1,5 +1,7 @@
 package at.ac.fhcampuswien.database;
 
+import at.ac.fhcampuswien.exceptions.DatabaseException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -7,24 +9,24 @@ import java.sql.Statement;
 
 public class DatabaseUtil {
 
-    // JDBC connection data for the H2 database.
-    // The database file is stored in the user's home directory as "movieDb".
+    // jdbc connection data for the h2 database.
+    // the database file is stored in the user's home directory as "movieDb".
     private static final String JDBC_URL = "jdbc:h2:~/movieDb";
     private static final String USER = "user";
     private static final String PASSWORD = "pw";
 
-    // Private constructor because this is a utility class and should not be instantiated.
+    // utility class, no instances.
     private DatabaseUtil() {
     }
 
-    // Creates and returns a new connection to the H2 database.
+    // returns a fresh jdbc connection to the h2 database.
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
     }
 
-    // Creates the movies table if it does not already exist.
-    // This method should be called once when the application starts.
-    public static void initializeDatabase() {
+    // creates the movies table if it does not exist yet.
+    // surfaces any jdbc failure as a DatabaseException so callers can react.
+    public static void initializeDatabase() throws DatabaseException {
         String sql = """
                 CREATE TABLE IF NOT EXISTS movies (
                     id UUID PRIMARY KEY,
@@ -38,7 +40,7 @@ public class DatabaseUtil {
              Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
-            throw new RuntimeException("Could not initialize database", e);
+            throw new DatabaseException("Could not initialize database", e);
         }
     }
 }
