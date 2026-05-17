@@ -10,8 +10,8 @@ import java.sql.Statement;
 public class DatabaseUtil {
 
     // jdbc connection data for the h2 database.
-    // the database file is stored in the user's home directory as "movieDb".
-    private static final String JDBC_URL = "jdbc:h2:~/movieDb";
+    // the database file is stored in src/data/movieDb.
+    private static final String JDBC_URL = "jdbc:h2:./src/data/movieDb";
     private static final String USER = "user";
     private static final String PASSWORD = "pw";
 
