@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.repositories;
 
 import at.ac.fhcampuswien.database.DatabaseUtil;
+import at.ac.fhcampuswien.database.DatabaseException;
 import at.ac.fhcampuswien.models.Movie;
 
 import java.sql.Connection;
@@ -38,7 +39,7 @@ public class MovieRepository {
 
         } catch (SQLException e) {
             // If a database error occurs, wrap it in a RuntimeException.
-            throw new RuntimeException("Could not add movie", e);
+            throw new DatabaseException("Could not add movie", e);
         }
     }
 
@@ -76,7 +77,7 @@ public class MovieRepository {
 
         } catch (SQLException e) {
             // If a database error occurs, wrap it in a RuntimeException.
-            throw new RuntimeException("Could not find movies", e);
+            throw new DatabaseException("Could not find movies", e);
         }
 
         // Return the complete list of movies.
@@ -108,7 +109,7 @@ public class MovieRepository {
 
         } catch (SQLException e) {
             // If a database error occurs, wrap it in a RuntimeException.
-            throw new RuntimeException("Could not delete movie", e);
+            throw new DatabaseException("Could not delete movie", e);
         }
     }
 
@@ -140,7 +141,7 @@ public class MovieRepository {
 
         } catch (SQLException e) {
             // If a database error occurs, wrap it in a RuntimeException.
-            throw new RuntimeException("Could not update movie", e);
+            throw new DatabaseException("Could not update movie", e);
         }
     }
 }
