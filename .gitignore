@@ -2,8 +2,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
+.*
 ./gitignore
+src/data/*
 
 ### IntelliJ IDEA ###
 .idea
@@ -40,3 +41,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Environment ###
+.env
+src/data/
