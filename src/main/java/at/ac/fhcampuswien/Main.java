@@ -3,8 +3,6 @@ package at.ac.fhcampuswien;
 import at.ac.fhcampuswien.controllers.HelloController;
 import at.ac.fhcampuswien.controllers.MovieController;
 import at.ac.fhcampuswien.database.DatabaseUtil;
-import at.ac.fhcampuswien.exceptions.DatabaseException;
-import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.repositories.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
@@ -14,6 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.sql.SQLException;
 import java.util.List;
 
 public class Main {
@@ -23,7 +22,7 @@ public class Main {
         // bring up the h2 schema before serving any traffic.
         try {
             DatabaseUtil.initializeDatabase();
-        } catch (DatabaseException e) {
+        } catch (SQLException e) {
             System.err.println("Database initialization failed: " + e.getMessage());
             return;
         }
@@ -76,7 +75,7 @@ public class Main {
 
             System.out.println("[demo] after delete:");
             print(service.getAllMovies());
-        } catch (DatabaseException | MovieNotFoundException e) {
+        } catch (SQLException e) {
             System.err.println("[demo] failed: " + e.getMessage());
         }
     }
