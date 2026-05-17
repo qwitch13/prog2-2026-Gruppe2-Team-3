@@ -1,8 +1,6 @@
 package at.ac.fhcampuswien.repositories;
 
 import at.ac.fhcampuswien.database.DatabaseUtil;
-import at.ac.fhcampuswien.exceptions.DatabaseException;
-import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 
 import java.sql.Connection;
@@ -13,15 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// repository class responsible for direct database access.
-// every method that talks to jdbc translates a SQLException into a DatabaseException
-// so callers do not have to know about jdbc specifics. methods that expect to find
-// a row (delete, update) raise MovieNotFoundException when the row is missing.
 public class MovieRepository {
 
-    // inserts a new movie into the database.
-    // throws DatabaseException if the underlying jdbc call fails.
-    public void add(Movie movie) throws DatabaseException {
+    public void add(Movie movie) throws SQLException {
         String sql = "INSERT INTO movies (id, title, genre, release_year) VALUES (?, ?, ?, ?)";
 
         try (Connection connection = DatabaseUtil.getConnection();
@@ -33,15 +25,10 @@ public class MovieRepository {
             statement.setInt(4, movie.getReleaseYear());
 
             statement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Could not add movie", e);
         }
     }
 
-    // reads all movies from the database.
-    // throws DatabaseException if the query fails.
-    public List<Movie> findAll() throws DatabaseException {
+    public List<Movie> findAll() throws SQLException {
         String sql = "SELECT * FROM movies";
         List<Movie> movies = new ArrayList<>();
 
@@ -60,18 +47,12 @@ public class MovieRepository {
 
                 movies.add(movie);
             }
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Could not find movies", e);
         }
 
         return movies;
     }
 
-    // deletes a movie matched by title, genre and release year.
-    // throws MovieNotFoundException if no row was deleted.
-    // throws DatabaseException if the jdbc call fails.
-    public boolean delete(Movie movie) throws DatabaseException, MovieNotFoundException {
+    public boolean delete(Movie movie) throws SQLException {
         String sql = "DELETE FROM movies WHERE title = ? AND genre = ? AND release_year = ?";
 
         try (Connection connection = DatabaseUtil.getConnection();
@@ -82,21 +63,11 @@ public class MovieRepository {
             statement.setInt(3, movie.getReleaseYear());
 
             int rowsAffected = statement.executeUpdate();
-
-            if (rowsAffected == 0) {
-                throw new MovieNotFoundException("Movie not found for deletion");
-            }
-            return true;
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Could not delete movie", e);
+            return rowsAffected > 0;
         }
     }
 
-    // updates the title, genre and release year of a movie identified by id.
-    // throws MovieNotFoundException if no row matched the id.
-    // throws DatabaseException if the jdbc call fails.
-    public boolean update(Movie movie) throws DatabaseException, MovieNotFoundException {
+    public boolean update(Movie movie) throws SQLException {
         String sql = "UPDATE movies SET title = ?, genre = ?, release_year = ? WHERE id = ?";
 
         try (Connection connection = DatabaseUtil.getConnection();
@@ -108,14 +79,7 @@ public class MovieRepository {
             statement.setObject(4, movie.getId());
 
             int rowsAffected = statement.executeUpdate();
-
-            if (rowsAffected == 0) {
-                throw new MovieNotFoundException("Movie not found for update");
-            }
-            return true;
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Could not update movie", e);
+            return rowsAffected > 0;
         }
     }
 }

@@ -1,7 +1,6 @@
 package at.ac.fhcampuswien.database;
 
 import at.ac.fhcampuswien.EnvLoader;
-import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.models.Movie;
 
 import java.sql.Connection;
@@ -17,25 +16,18 @@ public class DatabaseUtil {
         EnvLoader.load();
     }
 
-    // jdbc connection data for the h2 database.
-    // the database file is stored in src/data/movieDb.
     private static final String JDBC_URL = "jdbc:h2:./src/data/movieDb";
     private static final String USER = System.getProperty("DB_USER", "user");
     private static final String PASSWORD = System.getProperty("DB_PASSWORD", "pw");
 
-    // utility class, no instances.
     private DatabaseUtil() {
     }
 
-    // returns a fresh jdbc connection to the h2 database.
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
     }
 
-    // creates the movies table if it does not exist yet.
-    // if the table is empty, populates it with dummy data.
-    // surfaces any jdbc failure as a DatabaseException so callers can react.
-    public static void initializeDatabase() throws DatabaseException {
+    public static void initializeDatabase() throws SQLException {
         String createTableSql = """
                 CREATE TABLE IF NOT EXISTS movies (
                     id UUID PRIMARY KEY,
@@ -52,8 +44,6 @@ public class DatabaseUtil {
             if (isTableEmpty(connection)) {
                 populateDummyData(connection);
             }
-        } catch (SQLException e) {
-            throw new DatabaseException("Could not initialize database", e);
         }
     }
 
