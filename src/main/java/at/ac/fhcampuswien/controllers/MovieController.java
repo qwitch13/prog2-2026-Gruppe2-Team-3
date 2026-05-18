@@ -1,7 +1,7 @@
 package at.ac.fhcampuswien.controllers;
 
 import at.ac.fhcampuswien.ApiUtils;
-import at.ac.fhcampuswien.database.DatabaseException;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.repositories.MovieRepository;
@@ -13,7 +13,6 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -45,12 +44,12 @@ public class MovieController implements HttpHandler {
                 case BASE + "update" -> handleUpdate(method, exchange);
                 default -> ApiUtils.sendResponse(exchange, 404, "{ \"error\": \"Path not found\" }");
             }
-        } catch (SQLException e) {
+        } catch (DatabaseException e) {
             ApiUtils.sendResponse(exchange, 500, "{ \"error\": \"Database error\" }");
         }
     }
 
-    private void handleGetAll(String method, HttpExchange exchange) throws IOException, SQLException {
+    private void handleGetAll(String method, HttpExchange exchange) throws IOException {
         if (!"GET".equals(method)) {
             ApiUtils.sendResponse(exchange, 405, "{ \"error\": \"Method not allowed\" }");
             return;
@@ -60,7 +59,7 @@ public class MovieController implements HttpHandler {
         ApiUtils.sendResponse(exchange, 200, response);
     }
 
-    private void handleSearchMovies(HttpExchange exchange) throws IOException, SQLException {
+    private void handleSearchMovies(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
             ApiUtils.sendResponse(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
             return;
@@ -82,7 +81,7 @@ public class MovieController implements HttpHandler {
 
     }
 
-    private void handleAdd(String method, HttpExchange exchange) throws IOException, SQLException {
+    private void handleAdd(String method, HttpExchange exchange) throws IOException {
         if (!"POST".equals(method)) {
             ApiUtils.sendResponse(exchange, 405, "{ \"error\": \"Method not allowed\" }");
             return;
@@ -111,7 +110,7 @@ public class MovieController implements HttpHandler {
         }
     }
 
-    private void handleDelete(String method, HttpExchange exchange) throws IOException, SQLException {
+    private void handleDelete(String method, HttpExchange exchange) throws IOException {
         if (!"DELETE".equals(method)) {
             ApiUtils.sendResponse(exchange, 405, "{ \"error\": \"Method not allowed\" }");
             return;
@@ -139,7 +138,7 @@ public class MovieController implements HttpHandler {
 
     }
 
-    private void handleUpdate(String method, HttpExchange exchange) throws IOException, SQLException {
+    private void handleUpdate(String method, HttpExchange exchange) throws IOException {
         if (!"PUT".equals(method)) {
             ApiUtils.sendResponse(exchange, 405, "{ \"ERROR\": \"Method not allowed\" }");
             return;

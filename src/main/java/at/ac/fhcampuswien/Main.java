@@ -3,6 +3,8 @@ package at.ac.fhcampuswien;
 import at.ac.fhcampuswien.controllers.HelloController;
 import at.ac.fhcampuswien.controllers.MovieController;
 import at.ac.fhcampuswien.database.DatabaseUtil;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
+import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.repositories.MovieRepository;
 import at.ac.fhcampuswien.services.MovieService;
@@ -18,7 +20,7 @@ import java.util.List;
 public class Main {
     private static final int SERVER_PORT = 8080;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         // bring up the h2 schema before serving any traffic.
         try {
             DatabaseUtil.initializeDatabase();
@@ -33,17 +35,21 @@ public class Main {
             runDatabaseDemo();
         }
 
-        // create an http server listening on the configured port
-        HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
+        try {
+            // create an http server listening on the configured port
+            HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
 
-        // register controllers and their handlers - rest endpoints
-        registerController(server, "/api/hello", new HelloController());
-        registerController(server, "/api/movies/", new MovieController());
+            // register controllers and their handlers - rest endpoints
+            registerController(server, "/api/hello", new HelloController());
+            registerController(server, "/api/movies/", new MovieController());
 
-        // start the server
-        server.setExecutor(null);
-        server.start();
-        System.out.printf("Server is running on http://localhost:%d%n", SERVER_PORT);
+            // start the server
+            server.setExecutor(null);
+            server.start();
+            System.out.printf("Server is running on http://localhost:%d%n", SERVER_PORT);
+        } catch (IOException e) {
+            System.err.println("Server startup failed: " + e.getMessage());
+        }
     }
 
     // helper method to register a controller with its handler
@@ -75,7 +81,7 @@ public class Main {
 
             System.out.println("[demo] after delete:");
             print(service.getAllMovies());
-        } catch (SQLException e) {
+        } catch (DatabaseException | MovieNotFoundException e) {
             System.err.println("[demo] failed: " + e.getMessage());
         }
     }

@@ -1,6 +1,6 @@
 package at.ac.fhcampuswien.services.services;
 
-import at.ac.fhcampuswien.database.DatabaseException;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.repositories.MovieRepository;

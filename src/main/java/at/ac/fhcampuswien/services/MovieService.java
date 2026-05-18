@@ -1,11 +1,10 @@
 package at.ac.fhcampuswien.services;
 
-import at.ac.fhcampuswien.database.DatabaseException;
+import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
 import at.ac.fhcampuswien.repositories.MovieRepository;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class MovieService {
@@ -16,7 +15,7 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public List<Movie> getAllMovies() throws SQLException {
+    public List<Movie> getAllMovies() throws DatabaseException {
         return movieRepository.findAll();
     }
 
@@ -31,7 +30,7 @@ public class MovieService {
                 .toList();
     }
 
-    public boolean movieExists(Movie movie) throws SQLException {
+    public boolean movieExists(Movie movie) throws DatabaseException {
         if (movie == null || movie.getTitle() == null) {
             return false;
         }
