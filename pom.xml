@@ -73,6 +73,33 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
             </plugin>
+
+            <!-- pin the main class so `mvn exec:java` works without -Dexec.mainClass=... -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <mainClass>at.ac.fhcampuswien.Main</mainClass>
+                </configuration>
+            </plugin>
+
+            <!-- wipe the persistent H2 db on `mvn clean` so demo runs start fresh -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/data</directory>
+                            <includes>
+                                <include>movieDb.*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
