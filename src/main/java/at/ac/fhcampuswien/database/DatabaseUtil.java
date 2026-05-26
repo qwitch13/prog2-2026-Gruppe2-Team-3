@@ -27,7 +27,7 @@ public class DatabaseUtil {
         return DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
     }
 
-    public static void initializeDatabase() throws SQLException {
+    public static void initializeDatabase() throws DatabaseException {
         String createTableSql = """
                 CREATE TABLE IF NOT EXISTS movies (
                     id UUID PRIMARY KEY,
@@ -39,22 +39,29 @@ public class DatabaseUtil {
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
+
             statement.execute(createTableSql);
 
             if (isTableEmpty(connection)) {
                 populateDummyData(connection);
             }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Could not initialize database", e);
         }
     }
 
     private static boolean isTableEmpty(Connection connection) throws SQLException {
         String countSql = "SELECT COUNT(*) FROM movies";
+
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(countSql)) {
+
             if (resultSet.next()) {
                 return resultSet.getInt(1) == 0;
             }
         }
+
         return true;
     }
 
@@ -64,12 +71,13 @@ public class DatabaseUtil {
 
         try (PreparedStatement statement = connection.prepareStatement(insertSql)) {
             for (Movie movie : dummyMovies) {
-                statement.setString(1, movie.getId().toString());
+                statement.setObject(1, movie.getId());
                 statement.setString(2, movie.getTitle());
                 statement.setString(3, movie.getGenre());
                 statement.setInt(4, movie.getReleaseYear());
                 statement.addBatch();
             }
+
             statement.executeBatch();
             System.out.println("✓ Database populated with " + dummyMovies.size() + " dummy movies");
         }
