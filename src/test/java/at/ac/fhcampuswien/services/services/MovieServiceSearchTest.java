@@ -28,10 +28,22 @@ public class MovieServiceSearchTest {
         movieRepository = mock(MovieRepository.class);
 
         List<Movie> catalog = new ArrayList<>(Arrays.asList(
-                new Movie("Inception", "Sci-Fi", 2010),
-                new Movie("The Dark Knight", "Action", 2008),
-                new Movie("Interstellar", "Sci-Fi", 2014),
-                new Movie("Titanic", "Romance", 1997)
+                new Movie.MovieBuilder("Inception")
+                        .genre("Sci-Fi")
+                        .releaseYear(2010)
+                        .build(),
+                new Movie.MovieBuilder("The Dark Knight")
+                        .genre("Action")
+                        .releaseYear(2008)
+                        .build(),
+                new Movie.MovieBuilder("Interstellar")
+                        .genre("Sci-Fi")
+                        .releaseYear(2014)
+                        .build(),
+                new Movie.MovieBuilder("Titanic")
+                        .genre("Romance")
+                        .releaseYear(1997)
+                        .build()
         ));
 
         when(movieRepository.findAll()).thenReturn(catalog);

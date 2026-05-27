@@ -31,9 +31,18 @@ public class MovieServiceAddTest {
         movieRepository = mock(MovieRepository.class);
 
         movies = new ArrayList<>(Arrays.asList(
-                new Movie("Inception", "Sci-Fi", 2010),
-                new Movie("The Dark Knight", "Action", 2008),
-                new Movie("Interstellar", "Sci-Fi", 2014)
+                new Movie.MovieBuilder("Inception")
+                        .genre("Sci-Fi")
+                        .releaseYear(2010)
+                        .build(),
+                new Movie.MovieBuilder("The Dark Knight")
+                        .genre("Action")
+                        .releaseYear(2008)
+                        .build(),
+                new Movie.MovieBuilder("Interstellar")
+                        .genre("Sci-Fi")
+                        .releaseYear(2014)
+                        .build()
         ));
 
         // every findAll() returns the same in-memory list; add() appends to it
@@ -49,7 +58,10 @@ public class MovieServiceAddTest {
 
     @Test
     void testAddMovie_Success() throws DatabaseException {
-        Movie newMovie = new Movie("Titanic", "Drama", 1997);
+        Movie newMovie = new Movie.MovieBuilder("Titanic")
+                .genre("Drama")
+                .releaseYear(1997)
+                .build();
 
         boolean result = movieService.addMovie(newMovie);
 
@@ -61,7 +73,7 @@ public class MovieServiceAddTest {
 
     @Test
     void testAddMovie_DelegatesToRepository() throws DatabaseException {
-        Movie newMovie = new Movie("Titanic", "Drama", 1997);
+        Movie newMovie = new Movie.MovieBuilder("Titanic").genre("Drama").releaseYear(1997).build();
 
         movieService.addMovie(newMovie);
 
@@ -79,7 +91,7 @@ public class MovieServiceAddTest {
 
     @Test
     void testAddMovie_NullTitle_ReturnsFalse() throws DatabaseException {
-        Movie incomplete = new Movie(null, "Drama", 1997);
+        Movie incomplete = new Movie.MovieBuilder(null).genre("Drama").releaseYear(1997).build();
 
         boolean result = movieService.addMovie(incomplete);
 
@@ -89,8 +101,8 @@ public class MovieServiceAddTest {
 
     @Test
     void testAddMovie_MultipleMovies() throws DatabaseException {
-        movieService.addMovie(new Movie("Titanic", "Drama", 1997));
-        movieService.addMovie(new Movie("Avatar", "Sci-Fi", 2009));
+        movieService.addMovie(new Movie.MovieBuilder("Titanic").genre("Drama").releaseYear(1997).build());
+        movieService.addMovie(new Movie.MovieBuilder("Avatar").genre("Sci-Fi").releaseYear(2009).build());
 
         verify(movieRepository, times(2)).add(any(Movie.class));
         assertEquals(5, movies.size());
@@ -98,7 +110,7 @@ public class MovieServiceAddTest {
 
     @Test
     void testAddMovie_PropagatesDatabaseException() throws DatabaseException {
-        Movie movie = new Movie("Titanic", "Drama", 1997);
+        Movie movie = new Movie.MovieBuilder("Titanic").genre("Drama").releaseYear(1997).build();
         doThrow(new DatabaseException("connection lost"))
                 .when(movieRepository).add(movie);
 

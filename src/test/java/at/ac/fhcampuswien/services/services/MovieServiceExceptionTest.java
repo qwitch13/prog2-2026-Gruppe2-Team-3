@@ -32,9 +32,18 @@ class MovieServiceExceptionTest {
         movieRepository = mock(MovieRepository.class);
 
         List<Movie> movies = new ArrayList<>(Arrays.asList(
-                new Movie("Inception", "Sci-Fi", 2010),
-                new Movie("The Dark Knight", "Action", 2008),
-                new Movie("Interstellar", "Sci-Fi", 2014)
+                new Movie.MovieBuilder("Inception")
+                        .genre("Sci-Fi")
+                        .releaseYear(2010)
+                        .build(),
+                new Movie.MovieBuilder("The Dark Knight")
+                        .genre("Action")
+                        .releaseYear(2008)
+                        .build(),
+                new Movie.MovieBuilder("Interstellar")
+                        .genre("Sci-Fi")
+                        .releaseYear(2014)
+                        .build()
         ));
 
         when(movieRepository.findAll()).thenReturn(movies);
@@ -47,7 +56,7 @@ class MovieServiceExceptionTest {
     @Test
     void should_throw_database_exception_when_deleting_movie_with_db_error()
             throws DatabaseException, MovieNotFoundException {
-        Movie movieToDelete = new Movie("Inception", "Sci-Fi", 2010);
+        Movie movieToDelete = new Movie.MovieBuilder("Inception").genre("Sci-Fi").releaseYear(2010).build();
         when(movieRepository.delete(movieToDelete))
                 .thenThrow(new DatabaseException("Database connection error"));
 
@@ -59,7 +68,7 @@ class MovieServiceExceptionTest {
     @Test
     void should_throw_movie_not_found_when_deleting_unknown_movie()
             throws DatabaseException, MovieNotFoundException {
-        Movie unknown = new Movie("Unknown", "Drama", 1900);
+        Movie unknown = new Movie.MovieBuilder("Unknown").genre("Drama").releaseYear(1900).build();
         when(movieRepository.delete(unknown))
                 .thenThrow(new MovieNotFoundException("Movie not found for deletion"));
 
@@ -71,7 +80,7 @@ class MovieServiceExceptionTest {
     @Test
     void should_throw_movie_not_found_when_updating_unknown_movie()
             throws DatabaseException, MovieNotFoundException {
-        Movie missing = new Movie("Ghost", "Horror", 1999);
+        Movie missing = new Movie.MovieBuilder("Ghost").genre("Horror").releaseYear(1999).build();
         missing.setId(UUID.randomUUID());
         when(movieRepository.update(missing))
                 .thenThrow(new MovieNotFoundException("Movie not found for update"));

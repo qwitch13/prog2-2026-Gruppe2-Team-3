@@ -1,27 +1,23 @@
 package at.ac.fhcampuswien.models;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList; // Import the ArrayList class for dynamic arrays
 import java.util.List; // Import the List interface for generic collections
 import java.util.Random; // Import the Random class for generating random numbers
 import java.util.UUID; // Import the UUID class for generating unique identifiers
 
 public class Movie {
+
     private UUID id; // Unique identifier for each movie
     private String title; // Title of the movie
     private String genre; // Genre of the movie
     private int releaseYear; // Year of release
 
-    public Movie() {
-        this.id = UUID.randomUUID();
-    } // Default constructor
-
-    public Movie(String title, String genre, int releaseYear) { // Constructor with parameters
-        this.id = UUID.randomUUID();
-        this.title = title;
-        this.genre = genre;
-        this.releaseYear = releaseYear;
+    // deleted all constructors that we now don't need with Builder
+    public Movie(MovieBuilder movieBuilder) { // Constructor with parameters
+        this.id = movieBuilder.id;
+        this.title = movieBuilder.title;
+        this.genre = movieBuilder.genre;
+        this.releaseYear = movieBuilder.releaseYear;
     }
 
     // Getters and setters for movie properties
@@ -62,25 +58,32 @@ public class Movie {
         return "Movie{" + "id=<" + id + ">, title='<" + title + ">', " + ", genre='<" + genre + ">', " + ", releaseYear=<" + releaseYear + ">}";
     }
 
-    public static List<Movie> generateDummyMovies() { // Generate a list of dummy movies
-        List<Movie> movies = new ArrayList<>();
+    // created Builder
+    public static class MovieBuilder {
+        private UUID id;
+        private String title;
+        private String genre;
+        private int releaseYear;
 
-        String[] genres = {
-                "Action", "Drama", "Comedy", "Horror", "Sci-Fi",
-                "Thriller", "Fantasy", "Romance", "Adventure", "Mystery"
-        };
-
-        Random random = new Random();
-
-        for (int i = 0; i < 20; i++) {
-            Movie movie = new Movie();
-            movie.setTitle(DummyGenerator.generateMovieTitle());  // Use random title
-            movie.setGenre(genres[random.nextInt(genres.length)]); // Random genre
-            movie.setReleaseYear(1900 + random.nextInt(126)); // Random release year between 1900 and 2026
-
-            movies.add(movie);
+        public MovieBuilder(String title) {
+            this.title = title;
         }
 
-        return movies;
+        public MovieBuilder id() {
+            this.id = UUID.randomUUID();
+            return this;
+        }
+
+        public MovieBuilder genre(String genre) {
+            this.genre = genre;
+            return this;
+        }
+        public MovieBuilder releaseYear(int releaseYear) {
+            this.releaseYear = releaseYear;
+            return this;
+        }
+        public Movie build() {
+            return new Movie(this);
+        }
     }
 }

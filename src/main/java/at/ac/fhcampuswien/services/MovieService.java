@@ -3,24 +3,27 @@ package at.ac.fhcampuswien.services;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
-import at.ac.fhcampuswien.repositories.MovieRepository;
+import at.ac.fhcampuswien.repositories.Repository;
 
 import java.util.List;
 
 public class MovieService {
 
-    private final MovieRepository movieRepository;
+    // SOLID - Dependency Inversion Principle
+    // Repository Interface & Movie Repository now injected and dependency inverse
+    // all movieRepository -> Repository
+    private final Repository repository;
 
-    public MovieService(MovieRepository movieRepository) {
-        this.movieRepository = movieRepository;
+    public MovieService(Repository repository) {
+        this.repository = repository;
     }
 
     public List<Movie> getAllMovies() throws DatabaseException {
-        return movieRepository.findAll();
+        return repository.findAll();
     }
 
     public List<Movie> searchMovies(String title, String genre, String releaseYear) throws DatabaseException {
-        return movieRepository.findAll().stream()
+        return repository.findAll().stream()
                 .filter(movie -> title == null || title.isEmpty()
                         || movie.getTitle().toLowerCase().contains(title.toLowerCase()))
                 .filter(movie -> genre == null || genre.isEmpty()
@@ -35,7 +38,7 @@ public class MovieService {
             return false;
         }
 
-        return movieRepository.findAll().stream()
+        return repository.findAll().stream()
                 .anyMatch(m -> m.getTitle().equals(movie.getTitle())
                         && m.getGenre().equals(movie.getGenre())
                         && m.getReleaseYear() == movie.getReleaseYear());
@@ -46,7 +49,7 @@ public class MovieService {
             return false;
         }
 
-        movieRepository.add(movie);
+        repository.add(movie);
         return true;
     }
 
@@ -55,7 +58,7 @@ public class MovieService {
             return false;
         }
 
-        return movieRepository.delete(movie);
+        return repository.delete(movie);
     }
 
     public boolean updateMovie(Movie updatedMovie) throws MovieNotFoundException, DatabaseException {
@@ -63,6 +66,6 @@ public class MovieService {
             return false;
         }
 
-        return movieRepository.update(updatedMovie);
+        return repository.update(updatedMovie);
     }
 }

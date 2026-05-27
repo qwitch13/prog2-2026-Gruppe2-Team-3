@@ -1,6 +1,5 @@
 package at.ac.fhcampuswien;
 
-import at.ac.fhcampuswien.controllers.HelloController;
 import at.ac.fhcampuswien.controllers.MovieController;
 import at.ac.fhcampuswien.database.DatabaseUtil;
 import at.ac.fhcampuswien.exceptions.DatabaseException;
@@ -40,7 +39,6 @@ public class Main {
             HttpServer server = HttpServer.create(new InetSocketAddress(SERVER_PORT), 0);
 
             // register controllers and their handlers - rest endpoints
-            registerController(server, "/api/hello", new HelloController());
             registerController(server, "/api/movies/", new MovieController());
 
             // start the server
@@ -63,8 +61,14 @@ public class Main {
     private static void runDatabaseDemo() {
         MovieService service = new MovieService(new MovieRepository());
         try {
-            Movie inception = new Movie("Inception", "Sci-Fi", 2010);
-            Movie interstellar = new Movie("Interstellar", "Sci-Fi", 2014);
+            Movie inception = new Movie.MovieBuilder("Inception")
+                    .genre("Sci-Fi")
+                    .releaseYear(2010)
+                    .build();
+            Movie interstellar = new Movie.MovieBuilder("Interstellar")
+                    .genre("Sci-Fi")
+                    .releaseYear(2014)
+                    .build();
             service.addMovie(inception);
             service.addMovie(interstellar);
 

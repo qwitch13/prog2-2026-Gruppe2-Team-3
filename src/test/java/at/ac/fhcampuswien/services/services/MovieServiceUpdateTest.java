@@ -30,7 +30,7 @@ public class MovieServiceUpdateTest {
 
     @Test
     void testUpdateMovie_Success() throws DatabaseException, MovieNotFoundException {
-        Movie updated = new Movie("Inception Reborn", "Sci-Fi", 2010);
+        Movie updated = new Movie.MovieBuilder("Inception Reborn").genre("Sci-Fi").releaseYear(2010).build();
         updated.setId(UUID.randomUUID());
         when(movieRepository.update(updated)).thenReturn(true);
 
@@ -42,7 +42,7 @@ public class MovieServiceUpdateTest {
 
     @Test
     void testUpdateMovie_NotFound_ThrowsException() throws DatabaseException, MovieNotFoundException {
-        Movie missing = new Movie("Titanic", "Drama", 1997);
+        Movie missing = new Movie.MovieBuilder("Titanic").genre("Drama").releaseYear(1997).build();
         missing.setId(UUID.randomUUID());
         when(movieRepository.update(missing))
                 .thenThrow(new MovieNotFoundException("Movie not found for update"));
@@ -60,7 +60,7 @@ public class MovieServiceUpdateTest {
 
     @Test
     void testUpdateMovie_NullId_ReturnsFalse() throws DatabaseException, MovieNotFoundException {
-        Movie movie = new Movie("Inception", "Sci-Fi", 2010);
+        Movie movie = new Movie.MovieBuilder("Inception").genre("Sci-Fi").releaseYear(2010).build();
         movie.setId(null);
 
         boolean result = movieService.updateMovie(movie);
@@ -71,7 +71,7 @@ public class MovieServiceUpdateTest {
 
     @Test
     void testUpdateMovie_PropagatesDatabaseException() throws DatabaseException, MovieNotFoundException {
-        Movie movie = new Movie("Inception", "Sci-Fi", 2010);
+        Movie movie = new Movie.MovieBuilder("Inception").genre("Sci-Fi").releaseYear(2010).build();
         movie.setId(UUID.randomUUID());
         when(movieRepository.update(movie))
                 .thenThrow(new DatabaseException("connection lost"));

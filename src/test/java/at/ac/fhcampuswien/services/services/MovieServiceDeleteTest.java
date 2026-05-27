@@ -30,7 +30,7 @@ public class MovieServiceDeleteTest {
 
     @Test
     void givenCorrectMovie_whenDelete_deletesMovie() throws DatabaseException, MovieNotFoundException {
-        Movie movieToDelete = new Movie("Inception", "Sci-Fi", 2010);
+        Movie movieToDelete = new Movie.MovieBuilder("Inception").genre("Sci-Fi").releaseYear(2010).build();
         when(movieRepository.delete(movieToDelete)).thenReturn(true);
 
         boolean result = movieService.deleteMovie(movieToDelete);
@@ -41,7 +41,7 @@ public class MovieServiceDeleteTest {
 
     @Test
     void givenNonExistingMovie_whenDelete_throwsMovieNotFoundException() throws DatabaseException, MovieNotFoundException {
-        Movie nonExistent = new Movie("Avatar", "Sci-Fi", 2009);
+        Movie nonExistent = new Movie.MovieBuilder("Avatar").genre("Sci-Fi").releaseYear(2009).build();
         when(movieRepository.delete(nonExistent))
                 .thenThrow(new MovieNotFoundException("Movie not found for deletion"));
 
@@ -58,7 +58,7 @@ public class MovieServiceDeleteTest {
 
     @Test
     void givenMovieWithNullTitle_whenDelete_returnsFalse() throws DatabaseException, MovieNotFoundException {
-        Movie incomplete = new Movie(null, "Sci-Fi", 2010);
+        Movie incomplete = new Movie.MovieBuilder(null).genre("Sci-Fi").releaseYear(2010).build();
 
         boolean result = movieService.deleteMovie(incomplete);
 
@@ -68,7 +68,7 @@ public class MovieServiceDeleteTest {
 
     @Test
     void givenDatabaseError_whenDelete_propagatesDatabaseException() throws DatabaseException, MovieNotFoundException {
-        Movie movie = new Movie("Inception", "Sci-Fi", 2010);
+        Movie movie = new Movie.MovieBuilder("Inception").genre("Sci-Fi").releaseYear(2010).build();
         when(movieRepository.delete(movie))
                 .thenThrow(new DatabaseException("Database connection error"));
 

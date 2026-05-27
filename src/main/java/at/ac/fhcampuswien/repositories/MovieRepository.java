@@ -15,7 +15,7 @@ import java.util.UUID;
 
 // Repository class responsible for direct database access.
 // This class contains the SQL statements and converts database rows into Movie objects.
-public class MovieRepository {
+public class MovieRepository implements Repository{
 
     // Inserts a new movie into the database.
     public void add(Movie movie) throws DatabaseException{
@@ -24,7 +24,7 @@ public class MovieRepository {
         String sql = "INSERT INTO movies (id, title, genre, release_year) VALUES (?, ?, ?, ?)";
 
         // Open a database connection and prepare the SQL statement.
-        // try-with-resources automatically closes the connection and statement afterwards.
+        // try-with-resources automatically closes the connection and statement afterward.
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
@@ -66,7 +66,10 @@ public class MovieRepository {
                 int releaseYear = resultSet.getInt("release_year");
 
                 // Create a Movie object from the database values.
-                Movie movie = new Movie(title, genre, releaseYear);
+                Movie movie = new Movie.MovieBuilder(title)
+                    .genre(genre)
+                    .releaseYear(releaseYear)
+                    .build();
 
                 // Set the database id on the Movie object.
                 // This is important for update operations.
