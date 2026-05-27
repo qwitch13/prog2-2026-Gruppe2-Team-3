@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.database;
 
 import at.ac.fhcampuswien.EnvLoader;
 import at.ac.fhcampuswien.models.Movie;
+import at.ac.fhcampuswien.models.DummyMovieBuilder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -66,7 +67,7 @@ public class DatabaseUtil {
     }
 
     private static void populateDummyData(Connection connection) throws SQLException {
-        List<Movie> dummyMovies = Movie.generateDummyMovies();
+        List<Movie> dummyMovies = DummyMovieBuilder.buildDummyMovies();
         String insertSql = "INSERT INTO movies (id, title, genre, release_year) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(insertSql)) {

@@ -1,11 +1,9 @@
 package at.ac.fhcampuswien.models;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList; // Import the ArrayList class for dynamic arrays
-import java.util.List; // Import the List interface for generic collections
-import java.util.Random; // Import the Random class for generating random numbers
-import java.util.UUID; // Import the UUID class for generating unique identifiers
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public class Movie {
     private UUID id; // Unique identifier for each movie
@@ -13,15 +11,63 @@ public class Movie {
     private String genre; // Genre of the movie
     private int releaseYear; // Year of release
 
+    // Default constructor needed for Gson and general object creation
     public Movie() {
         this.id = UUID.randomUUID();
-    } // Default constructor
+    }
 
-    public Movie(String title, String genre, int releaseYear) { // Constructor with parameters
+    // Existing constructor kept so old code and tests do not break
+    public Movie(String title, String genre, int releaseYear) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.genre = genre;
         this.releaseYear = releaseYear;
+    }
+
+    // Private constructor used by the nested MovieBuilder
+    private Movie(MovieBuilder builder) {
+        this.id = builder.id != null ? builder.id : UUID.randomUUID();
+        this.title = builder.title;
+        this.genre = builder.genre;
+        this.releaseYear = builder.releaseYear;
+    }
+
+    /**
+     * Builder Pattern.
+     *
+     * This nested static class creates Movie objects step by step.
+     * Each method sets one property and returns the builder itself.
+     * The build() method creates the final Movie object.
+     */
+    public static class MovieBuilder {
+        private UUID id;
+        private String title;
+        private String genre;
+        private int releaseYear;
+
+        public MovieBuilder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public MovieBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public MovieBuilder genre(String genre) {
+            this.genre = genre;
+            return this;
+        }
+
+        public MovieBuilder releaseYear(int releaseYear) {
+            this.releaseYear = releaseYear;
+            return this;
+        }
+
+        public Movie build() {
+            return new Movie(this);
+        }
     }
 
     // Getters and setters for movie properties
@@ -57,30 +103,16 @@ public class Movie {
         this.id = id;
     }
 
-    @Override // Override the toString method to provide a more readable representation of the Movie object
+    // Provides a readable representation of the Movie object
+    @Override
     public String toString() {
-        return "Movie{" + "id=<" + id + ">, title='<" + title + ">', " + ", genre='<" + genre + ">', " + ", releaseYear=<" + releaseYear + ">}";
+        return "Movie{" +
+                "id=<" + id + ">, " +
+                "title='<" + title + ">', " +
+                "genre='<" + genre + ">', " +
+                "releaseYear=<" + releaseYear + ">" +
+                "}";
     }
 
-    public static List<Movie> generateDummyMovies() { // Generate a list of dummy movies
-        List<Movie> movies = new ArrayList<>();
 
-        String[] genres = {
-                "Action", "Drama", "Comedy", "Horror", "Sci-Fi",
-                "Thriller", "Fantasy", "Romance", "Adventure", "Mystery"
-        };
-
-        Random random = new Random();
-
-        for (int i = 0; i < 20; i++) {
-            Movie movie = new Movie();
-            movie.setTitle(DummyGenerator.generateMovieTitle());  // Use random title
-            movie.setGenre(genres[random.nextInt(genres.length)]); // Random genre
-            movie.setReleaseYear(1900 + random.nextInt(126)); // Random release year between 1900 and 2026
-
-            movies.add(movie);
-        }
-
-        return movies;
-    }
 }

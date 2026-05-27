@@ -15,9 +15,10 @@ import java.util.UUID;
 
 // Repository class responsible for direct database access.
 // This class contains the SQL statements and converts database rows into Movie objects.
-public class MovieRepository {
+public class MovieRepository implements MovieRepositoryInterface {
 
     // Inserts a new movie into the database.
+    @Override
     public void add(Movie movie) throws DatabaseException{
         // SQL statement with placeholders.
         // The placeholders are filled later with the movie data.
@@ -45,6 +46,7 @@ public class MovieRepository {
     }
 
     // Reads all movies from the database.
+    @Override
     public List<Movie> findAll() throws DatabaseException{
         // SQL statement to select all movie rows.
         String sql = "SELECT * FROM movies";
@@ -86,6 +88,7 @@ public class MovieRepository {
     }
 
     // Deletes a movie from the database by title, genre and release year.
+    @Override
     public boolean delete(Movie movie) throws MovieNotFoundException, DatabaseException {
         // SQL statement for deleting a movie.
         // The movie is identified by title, genre and release year.
@@ -118,6 +121,7 @@ public class MovieRepository {
     }
 
     // Updates an existing movie in the database.
+    @Override
     public boolean update(Movie movie) throws MovieNotFoundException, DatabaseException {
         // SQL statement for updating title, genre and release year.
         // The movie is identified by its id.

@@ -3,7 +3,8 @@ package at.ac.fhcampuswien.services;
 import at.ac.fhcampuswien.database.DatabaseException;
 import at.ac.fhcampuswien.exceptions.MovieNotFoundException;
 import at.ac.fhcampuswien.models.Movie;
-import at.ac.fhcampuswien.repositories.MovieRepository;
+import at.ac.fhcampuswien.repositories.MovieRepositoryInterface;
+
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public class MovieService {
 
-    private final MovieRepository movieRepository;
+    private final MovieRepositoryInterface movieRepository;
 
     /**
      * Constructor injection:
@@ -23,7 +24,7 @@ public class MovieService {
      *
      * @param movieRepository repository used for database access
      */
-    public MovieService(MovieRepository movieRepository) {
+    public MovieService(MovieRepositoryInterface movieRepository) {
         this.movieRepository = movieRepository;
     }
 
@@ -32,7 +33,7 @@ public class MovieService {
      *
      * The service delegates the database access to the repository.
      *
-     * @return list of all movies
+     * @return list of all moviesp
      * @throws DatabaseException if a database error occurs
      */
     public List<Movie> getAllMovies() throws DatabaseException {
